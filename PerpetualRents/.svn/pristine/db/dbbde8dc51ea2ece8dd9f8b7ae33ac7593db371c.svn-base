@@ -1,0 +1,31 @@
+
+
+$(document).ready(function(){
+	
+$("#submitemailId").click(function(){
+	var emailId=document.getElementById("emailId").value;
+	//alert(emailId);
+	$.ajax({
+		
+		  url: "/PerpetualRents/home/forgetPasswordEmailId.htm?emaildID="+emailId,
+		  type: "post",
+	      dataType : "json",
+		  contentType: 'application/json',
+		 
+		  success:function(response){
+			  if(response.success==true)
+				  {
+				  window.location.href = "fogetPassword.htm?message="+false;
+				  }
+			  else
+				  {
+				  	window.location.href = "fogetPassword.htm?message="+true;
+				  }
+	    	 },
+	      error:function(){
+	    	  alert("Enter Valid Email Id");	
+	      }
+		});	
+	  });
+
+	});

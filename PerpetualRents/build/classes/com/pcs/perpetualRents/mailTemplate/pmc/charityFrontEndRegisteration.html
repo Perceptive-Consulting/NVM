@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+    
+		 Dear <span th:text="${receiverName}"></span>,
+		 <p>You have a message from charity with follwoing details:</p>
+			
+		 <p> Name : <span th:text="${name}"></span></p>
+		 
+		 <p> Email Id : <span th:text="${emailId}"></span></p>
+		 
+		 <p> contact Number : <span th:text="${contactNumber}"></span></p>
+		 
+		 <p> City : <span th:text="${city}"></span></p>
+		 
+		 <p> Message : <span th:text="${message}"></span></p>
+			
+			
+			
+		 <p>Thanks</p>
+		
+		 <p><span th:text="${senderName}">Admin</span></p>
+		
+		 <p>&nbsp;</p>
+			     
+    </body>
+
+</html>

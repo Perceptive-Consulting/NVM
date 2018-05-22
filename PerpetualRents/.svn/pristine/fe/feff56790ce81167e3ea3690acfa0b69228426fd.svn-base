@@ -1,0 +1,8 @@
+db.driver = com.mysql.jdbc.Driver
+db.url   = jdbc:mysql://127.0.0.1:3306/perpetualrents
+db.username = root
+db.password = admin
+db.maxIdle = 500
+db.initialSize = 25
+db.validationQuery = SELECT 1
+db.testWhileIdle = true

@@ -1,0 +1,188 @@
+package com.pcs.perpetualRents.business.bean;
+
+import java.io.Serializable;
+import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.common.bean.BusinessObject;
+import com.pcs.perpetualRents.enm.Status;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
+public class Property extends BusinessObject implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	public static final String TABLE_NAME = "tbl_" + ApplicationSettings.APP_NAME + "_" + Property.class.getSimpleName().toLowerCase();
+	
+	public static final String CONTACT_PERSON = "contactPerson";
+	public static final String AGENT_NAME = "agentName";
+	public static final String AGENT_CONTACT_NUMBER = "agentContactNumber";
+	public static final String AGENT_ADDRESS_LINE = "agentAddressLine";
+	public static final String UNIQUE_REFERENCE = "uniqueReference";
+	public static final String STATUS_PERCENTAGE = "statusPercentage";
+	public static final String LANDLORD_ID = "landlordId";
+	public static final String ENABLE = "enable";
+	public static final String STATUS_ID = "statusId";
+	public static final String USER_ID = "assignToUserId";
+	
+	private String uniqueReference;
+	private String contactPerson;
+	private String agentName;
+	private String agentContactNumber;
+	private String agentAddressLine;
+	private Integer statusPercentage;
+	private Short statusId;
+	private boolean enable;
+	
+	private Long landlordId;
+	private Address addressObj;
+	private String statusStr;
+	
+	
+	private AssignModel assignModel;
+	private Long assignToUserId;
+	
+	private LandLord landLordObj;
+	private UserLogin loginObj;
+	
+	private List<PropertyDocument>  documents;
+	
+	public List<PropertyDocument> getDocuments() {
+		return documents;
+	}
+	public void setDocuments(List<PropertyDocument> documents) {
+		this.documents = documents;
+	}
+	public UserLogin getLoginObj() {
+		return loginObj;
+	}
+	public void setLoginObj(UserLogin loginObj) {
+		this.loginObj = loginObj;
+	}
+	public LandLord getLandLordObj() {
+		return landLordObj;
+	}
+	public void setLandLordObj(LandLord landLordObj) {
+		this.landLordObj = landLordObj;
+	}
+	public Short getStatusId() {
+		return statusId;
+	}
+	public void setStatusId(Short statusId) {
+		this.statusId = statusId;
+	}
+	public String getStatusStr() {
+		return statusStr;
+	}
+	public void setStatusStr(String statusStr) {
+		this.statusStr = statusStr;
+	}
+	public boolean isEnable() {
+		return enable;
+	}
+	public void setEnable(boolean enable) {
+		this.enable = enable;
+	}
+	public Address getAddressObj() {
+		return addressObj;
+	}
+	public void setAddressObj(Address addressObj) {
+		this.addressObj = addressObj;
+	}
+	public String getContactPerson() {
+		return contactPerson;
+	}
+	public void setContactPerson(String contactPerson) {
+		this.contactPerson = contactPerson;
+	}
+	public String getAgentName() {
+		return agentName;
+	}
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+	public String getAgentContactNumber() {
+		return agentContactNumber;
+	}
+	public void setAgentContactNumber(String agentContactNumber) {
+		this.agentContactNumber = agentContactNumber;
+	}
+	public String getAgentAddressLine() {
+		return agentAddressLine;
+	}
+	public void setAgentAddressLine(String agentAddressLine) {
+		this.agentAddressLine = agentAddressLine;
+	}
+	public String getUniqueReference() {
+		return uniqueReference;
+	}
+	public void setUniqueReference(String uniqueReference) {
+		this.uniqueReference = uniqueReference;
+	}
+	public Integer getStatusPercentage() {
+		return statusPercentage;
+	}
+	public void setStatusPercentage(Integer statusPercentage) {
+		this.statusPercentage = statusPercentage;
+	}
+	public Long getLandlordId() {
+		return landlordId;
+	}
+	public void setLandlordId(Long landlordId) {
+		this.landlordId = landlordId;
+	}
+	
+	public AssignModel getAssignModel() {
+		return assignModel;
+	}
+	
+	public void setAssignModel(AssignModel assignModel) {
+		this.assignModel = assignModel;
+	}
+	
+	public Long getAssignToUserId() {
+		return assignToUserId;
+	}
+	
+	public void setAssignToUserId(Long assignToUserId) {
+		this.assignToUserId = assignToUserId;
+	}
+	
+	@Override
+	public String toString() {
+		return "Property [uniqueReference=" + uniqueReference
+				+ ", contactPerson=" + contactPerson + ", agentName="
+				+ agentName + ", agentContactNumber=" + agentContactNumber
+				+ ", agentAddressLine=" + agentAddressLine
+				+ ", statusPercentage=" + statusPercentage + ", statusId="
+				+ statusId + ", enable=" + enable + ", landlordId="
+				+ landlordId + ", addressObj=" + addressObj + ", statusStr="
+				+ statusStr + ", assignModel=" + assignModel
+				+ ", assignToUserId=" + assignToUserId + ", landLordObj="
+				+ landLordObj + ", loginObj=" + loginObj + "]";
+	}
+	
+	public JSONObject toJSON(boolean includeParent) throws JSONException{
+		JSONObject jObj = new JSONObject();
+		
+		if(includeParent)
+			jObj = super.toJSON();
+		
+		jObj.put(Property.CONTACT_PERSON, this.contactPerson);
+		jObj.put(Property.AGENT_NAME, this.agentName);
+		jObj.put(Property.AGENT_CONTACT_NUMBER, this.agentContactNumber);
+		jObj.put(Property.AGENT_ADDRESS_LINE, this.agentAddressLine);
+		jObj.put(Property.UNIQUE_REFERENCE, this.uniqueReference);
+		jObj.put(Property.STATUS_PERCENTAGE, this.statusPercentage);
+		jObj.put(Property.LANDLORD_ID, this.landlordId);
+		jObj.put(Property.STATUS_ID, this.statusId);
+		jObj.put("statusStr", Status.get(this.statusId).value());
+		
+		return jObj;
+		
+	}
+
+}

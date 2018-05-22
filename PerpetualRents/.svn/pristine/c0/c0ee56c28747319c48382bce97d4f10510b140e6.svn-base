@@ -1,0 +1,36 @@
+
+###################### DB Config ####################  
+
+driverClassName=com.mysql.jdbc.Driver
+url=jdbc:mysql://127.0.0.1:3306/perpetualtaken
+username=root	
+password=admin
+maxIdle=2
+initialSize=128
+validationQuery=SELECT 1
+testWhileIdle=true
+ 
+ 
+ 
+ 
+###################### DB Config ####################  
+
+#	driverClassName=com.mysql.jdbc.Driver
+#	url=jdbc:mysql://127.0.0.1:3306/perpetualgts
+#	username=perpetualgts
+#	password=perpetualgts@pcs
+#	maxIdle=2
+#	initialSize=128
+#	validationQuery=SELECT 1
+#	testWhileIdle=true
+	
+ ################### live DB ##############
+ #
+ #driverClassName=com.mysql.jdbc.Driver
+ #url=jdbc:mysql://127.0.0.1:3306/perpetual
+ #username=perpetual
+ #password=perpetual@123
+ #maxIdle=2
+ #initialSize=128
+ #validationQuery=SELECT 1
+ #testWhileIdle=true

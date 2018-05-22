@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+            
+        <!--Dear {contractor first and second name}, the {Landlord first name and second name} of {postcode} property details 
+            have been updated thanks to your help, but if you have not yet provided your service then this is a thank 
+            you in advance. Could you please ensure the landlord has a copy of any relevant certificates as soon as possible 
+            as this will help with their registration process, the provision of this certificate should encourage the 
+            landlord to make prompt payments  -->
+            
+            Dear <span th:text="${contractorName}"></span>, the <span th:text="${landlordName}"></span> of <span th:text="${posrCode}"></span> property details 
+            have been updated thanks to your help, but if you have not yet provided your service then this is a thank 
+            you in advance. Could you please ensure the landlord has a copy of any relevant certificates as soon as possible 
+            as this will help with their registration process, the provision of this certificate should encourage the 
+            landlord to make prompt payments.    
+		
+		<p>&nbsp;</p>
+
+		<p>Thanks</p>
+
+		<p><span th:text="${senderName}">Admin</span></p>
+					
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

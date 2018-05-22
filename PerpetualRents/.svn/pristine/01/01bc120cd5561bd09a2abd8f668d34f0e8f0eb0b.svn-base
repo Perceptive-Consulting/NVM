@@ -1,0 +1,383 @@
+package com.pcs.perpetualRents.dao.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.mysql.jdbc.Statement;
+import com.pcs.perpetualRents.business.bean.Address;
+import com.pcs.perpetualRents.business.bean.City;
+import com.pcs.perpetualRents.business.bean.Country;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.common.bean.DevelopmentSettings;
+import com.pcs.perpetualRents.dao.AddressDAO;
+import com.pcs.perpetualRents.dao.mapper.AddressMapper;
+
+@Repository
+public class AddressDAOImpl implements AddressDAO {
+	
+	private static Logger logger = ApplicationSettings.getLogger(AddressDAOImpl.class.getName()); 
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	@Autowired
+	private DevelopmentSettings developmentSettings;
+
+	@Override
+	public Long createAddress(final Address addressObj, final Long createdUserId) {
+		final String sql = "INSERT INTO " + Address.TABLE_NAME + " ( " + Address.ADDRESS_LINE1 + ", " + Address.ADDRESS_LINE2 + ", " + Address.CITY + ", " + Address.COUNTY
+				 	       + ", " + Address.POSTCODE + ", " + Address.LANDMARK + ", " + Address.LATITUDE + ", " + Address.LONGITUDE  + ", " + Address.TELEPHONE_NUMBER + ", " + Address.OBJECT_TYPE
+				 	       + ", " + Address.OBJECT_ID + ", " + Address.COUNTRY_ID + ", " + Address.CREATED_USER_ID
+				 	       + " ) "
+				           + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		
+			
+			jdbcTemplate.update(new PreparedStatementCreator() {
+				
+				@Override
+				public PreparedStatement createPreparedStatement(Connection connection)throws SQLException {
+						PreparedStatement psObj = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+						psObj.setString(1, addressObj.getAddressLine1());
+						if(addressObj.getAddressLine2() != null)
+							psObj.setString(2, addressObj.getAddressLine2());
+						else
+							psObj.setNull(2, Types.NULL);
+						psObj.setString(3, addressObj.getCity());
+						if(addressObj.getCounty() != null)
+							psObj.setString(4, addressObj.getCounty());
+						else
+							psObj.setNull(4, Types.NULL);
+						psObj.setString(5, addressObj.getPostCode());
+						if(addressObj.getLandmark() != null)
+							psObj.setString(6, addressObj.getLandmark());
+						else
+							psObj.setNull(6, Types.NULL);
+						if(addressObj.getLatitude() != null)
+							psObj.setString(7, addressObj.getLatitude());
+						else
+							psObj.setNull(7, Types.NULL);
+						if(addressObj.getLongitude() != null)
+							psObj.setString(8, addressObj.getLongitude());
+						else
+							psObj.setNull(8, Types.NULL);
+						if(addressObj.getTelephoneNumber() != null)
+							psObj.setString(9, addressObj.getTelephoneNumber());
+						else
+							psObj.setNull(9, Types.NULL);
+						psObj.setLong(10, addressObj.getObjectType());
+						psObj.setLong(11, addressObj.getObjectId());
+						psObj.setLong(12, addressObj.getCountryId());
+						if(createdUserId != null)
+							psObj.setLong(13, createdUserId);
+						else
+							psObj.setLong(13, Types.NULL);
+					return psObj;
+				}
+			}, keyHolder);
+			
+			
+			return keyHolder.getKey().longValue();
+	}
+	
+	
+	@Override
+	public boolean updateAddress(final Address addressObj, final Long modifiedUserId){
+		
+			String sql = "UPDATE " + Address.TABLE_NAME + " SET " + Address.ADDRESS_LINE1 + " = ?, " + Address.ADDRESS_LINE2 + " = ?, " + Address.CITY + " = ?, "
+						+ Address.COUNTY + " = ?, " + Address.LANDMARK + " = ?, " + Address.POSTCODE + " = ?, " + Address.TELEPHONE_NUMBER + " = ?, "
+						+ Address.MODIFIED_ON + " =CURRENT_TIMESTAMP, " + Address.MODIFIED_USER_ID + " = ? "
+						+ " WHERE " + Address.OBJECT_TYPE + " = ? AND " + Address.OBJECT_ID + " = ?";
+			
+			if(developmentSettings.isShowSQL())
+				logger.info(sql);
+				
+		int status = jdbcTemplate.update(sql, new PreparedStatementSetter() {
+				@Override
+				public void setValues(PreparedStatement psObj) throws SQLException {
+					psObj.setString(1 , addressObj.getAddressLine1());
+					if(addressObj.getAddressLine2() != null)
+						psObj.setString(2 , addressObj.getAddressLine2());
+					else
+						psObj.setNull(2 , Types.NULL);
+					psObj.setString(3, addressObj.getCity());
+					if(addressObj.getCounty() != null)
+						psObj.setString(4, addressObj.getCounty());
+					else
+						psObj.setNull(4, Types.NULL);
+					if(addressObj.getLandmark() != null)
+						psObj.setString(5, addressObj.getLandmark());
+					else
+						psObj.setNull(5, Types.NULL);
+					psObj.setString(6, addressObj.getPostCode());
+					if(addressObj.getTelephoneNumber() != null)
+						psObj.setString(7, addressObj.getTelephoneNumber());
+					else
+						psObj.setNull(7, Types.NULL);
+					psObj.setLong(8, modifiedUserId);
+					psObj.setLong(9, addressObj.getObjectType());
+					psObj.setLong(10, addressObj.getObjectId());
+					
+				}
+			});
+		if(status == 1)
+			return true;
+		else
+			return false;
+	}
+	
+	@Override
+	public boolean updateAddressById(final Address addressObj, final Long modifiedUserId){
+		
+		String sql = "UPDATE " + Address.TABLE_NAME + " SET " + Address.ADDRESS_LINE1 + " = ?, " + Address.ADDRESS_LINE2 + " = ?, " + Address.CITY + " = ?, "
+					+ Address.COUNTY + " = ?, " + Address.LANDMARK + " = ?, " + Address.POSTCODE + " = ?, " + Address.TELEPHONE_NUMBER + " = ?, "
+					+ Address.MODIFIED_ON + " =CURRENT_TIMESTAMP, " + Address.MODIFIED_USER_ID + " = ? "
+					+ " WHERE " + Address.ID + " = ? ";
+		
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+			
+	int status = jdbcTemplate.update(sql, new PreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement psObj) throws SQLException {
+				psObj.setString(1 , addressObj.getAddressLine1());
+				if(addressObj.getAddressLine2() != null)
+					psObj.setString(2 , addressObj.getAddressLine2());
+				else
+					psObj.setNull(2 , Types.NULL);
+				psObj.setString(3, addressObj.getCity());
+				if(addressObj.getCounty() != null)
+					psObj.setString(4, addressObj.getCounty());
+				else
+					psObj.setNull(4, Types.NULL);
+				if(addressObj.getLandmark() != null)
+					psObj.setString(5, addressObj.getLandmark());
+				else
+					psObj.setNull(5, Types.NULL);
+				psObj.setString(6, addressObj.getPostCode());
+				if(addressObj.getTelephoneNumber() != null)
+					psObj.setString(7, addressObj.getTelephoneNumber());
+				else
+					psObj.setNull(7, Types.NULL);
+				psObj.setLong(8, modifiedUserId);
+				psObj.setLong(9, addressObj.getId());
+				
+			}
+		});
+	if(status == 1)
+		return true;
+	else
+		return false;
+}
+	
+	@Override
+	public Address loadAddressById(Long id){
+		
+		String sql = "SELECT ua." +Address.ID + ", ua." + Address.ADDRESS_LINE1 + ", ua." + Address.ADDRESS_LINE2 + ", ua." + Address.CITY + ", ua." + Address.COUNTY + ", ua." + Address.LANDMARK
+				 + ", ua." + Address.LATITUDE + ", ua." + Address.LONGITUDE + ", ua." + Address.TELEPHONE_NUMBER
+				 + ", ua." + Address.POSTCODE + ", ua." + Address.COUNTRY_ID
+				 + ", ua." + Address.LATITUDE + ", ua." + Address.LONGITUDE + ", ua." + Address.POSTCODE + ", ua." + Address.OBJECT_ID
+				 + ", x1." + Country.COUNTRY_NAME + ", x1." + Country.COUNTRY_ALIAS + ", x1." + Country.COUNTRY_CODE + ", x1." + Country.CURRENCY
+				 + ", x1." + Country.TIME_ZONE + ", x1." + Country.ID
+				 + ", x2." + City.ID + " AS " + Address.CITY 
+				 + ", x2." + City.CITY   
+				 + " FROM " + Address.TABLE_NAME + " ua "
+				 + " LEFT JOIN " + Country.TABLE_NAME + " x1 ON ua." + Address.COUNTRY_ID + " = " + " x1." + Country.ID
+				 + " LEFT JOIN " + City.TABLE_NAME + " x2 ON ua." + Address.CITY + " = " + " x2." + City.ID
+				 + " WHERE ua." + Address.ID  + " = " + id;
+		
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+			
+		List<Address> addressList =  jdbcTemplate.query(sql, new AddressMapper());
+		
+		if(addressList != null && !addressList.isEmpty())
+			return addressList.get(0);
+		
+		return null;
+	}
+	
+	@Override
+	public List<Address> loadAddressById(Long objectType, Long objectTypeId) {
+		System.out.println("again in dao--2----- loadAddressById");
+			String sql = "SELECT ua." +Address.ID + ", ua." + Address.ADDRESS_LINE1 + ", ua." + Address.ADDRESS_LINE2 + ", ua." + Address.CITY + ", ua." + Address.COUNTY + ", ua." + Address.LANDMARK
+					+ ", ua." + Address.LATITUDE + ", ua." + Address.LONGITUDE + ", ua." + Address.TELEPHONE_NUMBER
+					 + ", ua." + Address.POSTCODE + ", ua." + Address.COUNTRY_ID
+					 + ", ua." + Address.LATITUDE + ", ua." + Address.LONGITUDE + ", ua." + Address.POSTCODE + ", ua." + Address.OBJECT_ID
+					 + ", x1." + Country.COUNTRY_NAME + ", x1." + Country.COUNTRY_ALIAS + ", x1." + Country.COUNTRY_CODE + ", x1." + Country.CURRENCY
+					 + ", x1." + Country.TIME_ZONE + ", x1." + Country.ID
+					 + ", x2." + City.ID + " AS " + Address.CITY 
+					 + ", x2." + City.CITY   
+					 + " FROM " + Address.TABLE_NAME + " ua "
+					 + " LEFT JOIN " + Country.TABLE_NAME + " x1 ON ua." + Address.COUNTRY_ID + " = " + " x1." + Country.ID
+					 + " LEFT JOIN " + City.TABLE_NAME + " x2 ON ua." + Address.CITY + " = " + " x2." + City.ID
+					 + " WHERE ua." + Address.OBJECT_TYPE  + " = " + objectType  + " AND ua." + Address.OBJECT_ID + " = " + objectTypeId ;
+			
+			if(developmentSettings.isShowSQL())
+				logger.info(sql);
+				
+			List<Address> addressList =  jdbcTemplate.query(sql, new AddressMapper());
+			
+			if(addressList != null && !addressList.isEmpty())
+				return addressList;
+			
+			return null;
+		}
+
+	
+	
+	
+	@Override
+	public List<Address> loadAddressByCity(String city, Long objectType) {
+		
+		if(city == null || objectType == null){
+			logger.log(Level.SEVERE, "AddressDAOImpl :: loadAddressByCity :: city " + city + " :: objectType " + objectType);
+			return null;
+		}
+		
+			String sql = "SELECT ua." +Address.ID + ", ua." + Address.ADDRESS_LINE1 + ", ua." + Address.ADDRESS_LINE2 + ", ua." + Address.CITY + ", ua." + Address.COUNTY + ", ua." + Address.LANDMARK
+					+ ", ua." + Address.LATITUDE + ", ua." + Address.LONGITUDE + ", ua." + Address.TELEPHONE_NUMBER
+					 + ", ua." + Address.POSTCODE + ", ua." + Address.COUNTRY_ID
+					 + ", ua." + Address.OBJECT_ID
+					 + ", x1." + Country.COUNTRY_NAME + ", x1." + Country.COUNTRY_ALIAS + ", x1." + Country.COUNTRY_CODE + ", x1." + Country.CURRENCY
+					 + ", x1." + Country.TIME_ZONE + ", x1." + Country.ID
+					 + ", x2." + City.ID + " AS " + Address.CITY 
+					 + ", x2." + City.CITY   
+					 + " FROM " + Address.TABLE_NAME + " ua "
+					 + " LEFT JOIN " + Country.TABLE_NAME + " x1 ON ua." + Address.COUNTRY_ID + " = " + " x1." + Country.ID
+					 + " LEFT JOIN " + City.TABLE_NAME + " x2 ON ua." + Address.CITY + " = " + " x2." + City.ID
+					 + " WHERE ua." + Address.OBJECT_TYPE  + " = " + objectType  + " AND ua." + Address.CITY + " = " + "'"+city + "'" ;
+			
+			if(developmentSettings.isShowSQL())
+				logger.info(sql);
+				
+			List<Address> addressList =  jdbcTemplate.query(sql, new AddressMapper());
+			System.out.println("  addressList   ============  "+addressList);
+			if(addressList != null && !addressList.isEmpty())
+				return addressList;
+			
+			return null;
+		}
+	
+	@Override
+	public List<Address> loadAddressByObjectId(String city, Long objectTypeId) {
+		
+		if(city == null || objectTypeId == null){
+			logger.log(Level.SEVERE, "AddressDAOImpl :: loadAddressByCity :: city " + city + " :: objectType " + objectTypeId);
+			return null;
+		}
+		
+			String sql = "SELECT ua." +Address.ID + ", ua." + Address.ADDRESS_LINE1 + ", ua." + Address.ADDRESS_LINE2 + ", ua." + Address.CITY + ", ua." + Address.COUNTY + ", ua." + Address.LANDMARK
+					+ ", ua." + Address.LATITUDE + ", ua." + Address.LONGITUDE + ", ua." + Address.TELEPHONE_NUMBER
+					 + ", ua." + Address.POSTCODE + ", ua." + Address.COUNTRY_ID
+					 + ", ua." + Address.OBJECT_ID
+					 + ", x1." + Country.COUNTRY_NAME + ", x1." + Country.COUNTRY_ALIAS + ", x1." + Country.COUNTRY_CODE + ", x1." + Country.CURRENCY
+					 + ", x1." + Country.TIME_ZONE + ", x1." + Country.ID
+					 + ", x2." + City.ID + " AS " + Address.CITY 
+					 + ", x2." + City.CITY   
+					 + " FROM " + Address.TABLE_NAME + " ua "
+					 + " LEFT JOIN " + Country.TABLE_NAME + " x1 ON ua." + Address.COUNTRY_ID + " = " + " x1." + Country.ID
+					 + " LEFT JOIN " + City.TABLE_NAME + " x2 ON ua." + Address.CITY + " = " + " x2." + City.ID
+					 + " WHERE ua." + Address.OBJECT_ID  + " = " + objectTypeId  + " AND ua." + Address.CITY + " = " + "'"+city + "'" ;
+			
+			if(developmentSettings.isShowSQL())
+				logger.info(sql);
+				
+			List<Address> addressList =  jdbcTemplate.query(sql, new AddressMapper());
+			
+			if(addressList != null && !addressList.isEmpty())
+				return addressList;
+			
+			return null;
+		}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
+	@Override
+	public boolean deleteAddress(Long objectType, Long objId) {
+		boolean status = false;
+		if(objId!=null && objectType != null){
+		String sql = "DELETE FROM " + Address.TABLE_NAME + " WHERE " + Address.OBJECT_ID + "=" + objId + " AND " + Address.OBJECT_TYPE + " = " + objectType;
+		
+		if(developmentSettings.isShowSQL()){
+			logger.info(sql);
+		}
+		
+			jdbcTemplate.update(sql);
+			status = true;
+		}
+		return status;
+	}
+	
+	@Override
+	public Long createCountry(final Country countryObj) {
+		final String sql = "INSERT INTO " + Country.TABLE_NAME + "( " + Country.COUNTRY_NAME + ", " + Country.COUNTRY_ALIAS
+						   + ", " + Country.COUNTRY_CODE + ", " + Country.CURRENCY + ", " + Country.TIME_ZONE + ")"
+					+ " VALUES (?, ?, ?, ?, ? )";
+
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		try{
+			jdbcTemplate.update(new PreparedStatementCreator() {
+				
+				@Override
+				public PreparedStatement createPreparedStatement(Connection connection)throws SQLException {
+						PreparedStatement psObj = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+						psObj.setString(1, countryObj.getCountryName());
+						psObj.setString(2, countryObj.getCountryAlias());
+						psObj.setString(3, countryObj.getCountryCode());
+						psObj.setString(4, countryObj.getCurrency());
+						psObj.setString(4, countryObj.getTimezone());
+							
+					return psObj;
+				}
+			}, keyHolder);
+			
+			return keyHolder.getKey().longValue();
+		}catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+			
+	}
+	
+	
+	public DevelopmentSettings getDevelopmentSettings() {
+		return developmentSettings;
+	}
+
+	public void setDevelopmentSettings(DevelopmentSettings developmentSettings) {
+		this.developmentSettings = developmentSettings;
+	}
+	
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+}

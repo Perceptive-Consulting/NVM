@@ -1,0 +1,413 @@
+package com.pcs.perpetualRents.manager.impl;
+
+import java.util.List;
+
+import javax.swing.SwingUtilities;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.spring3.SpringTemplateEngine;
+
+import com.pcs.perpetualRents.business.bean.Address;
+import com.pcs.perpetualRents.business.bean.Admin;
+import com.pcs.perpetualRents.business.bean.Authorities;
+import com.pcs.perpetualRents.business.bean.Charity;
+import com.pcs.perpetualRents.business.bean.City;
+import com.pcs.perpetualRents.business.bean.ContactDetails;
+import com.pcs.perpetualRents.business.bean.PerpetualCity;
+import com.pcs.perpetualRents.business.bean.UserLogin;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.dao.AddressDAO;
+import com.pcs.perpetualRents.dao.CityDAO;
+import com.pcs.perpetualRents.dao.ContactDetailsDAO;
+import com.pcs.perpetualRents.dao.IdentityGeneratorDAO;
+import com.pcs.perpetualRents.dao.PMCDAO;
+import com.pcs.perpetualRents.dao.UserAdminDAO;
+import com.pcs.perpetualRents.dao.UserLoginDAO;
+import com.pcs.perpetualRents.enm.IdentityGeneratorObjective;
+import com.pcs.perpetualRents.enm.MailEventType;
+import com.pcs.perpetualRents.enm.ObjectType;
+import com.pcs.perpetualRents.enm.UserType;
+import com.pcs.perpetualRents.manager.CommonManager;
+import com.pcs.perpetualRents.manager.MailEventManager;
+import com.pcs.perpetualRents.manager.PMCManager;
+import com.pcs.perpetualRents.util.mail.PMCMailUtility;
+import com.pcs.perpetualRents.util.mail.SubPmcMailUtility;
+
+@Service
+@Transactional
+public class PMCManagerImpl implements PMCManager{
+
+	@Autowired
+	private PMCDAO pmcDAO;
+	@Autowired
+	private AddressDAO addressDAO;
+	@Autowired
+	private ContactDetailsDAO contactDetailsDAO;
+	@Autowired
+	private UserLoginDAO userLoginDAO;
+	/*@Autowired
+	private DevelopmentSettings developmentSettings;*/
+	@Autowired
+	private IdentityGeneratorDAO gereratorDAO;
+	@Autowired
+	private CityDAO cityDAO;
+	@Autowired
+	private ApplicationSettings applicationSettings;
+	@Autowired
+	private JavaMailSender mailSender;
+	@Autowired
+	private SpringTemplateEngine templateEngine;
+	@Autowired
+	private CommonManager commonManager;
+	@Autowired
+	private UserAdminDAO userAdminDAO;
+	@Autowired
+	private MailEventManager eventManager;
+	
+	
+	@Transactional(rollbackFor=Exception.class)
+	@Override
+	public boolean createPMC(Charity charityObj, Long userId) {
+		
+		if(charityObj == null || userId== null)
+			return false;
+		
+		if(charityObj.getLoginObj() == null)
+			return false;
+		if(charityObj.getAddressObj() == null)
+			return false;
+		if(charityObj.getContactDetailsObj() == null)
+			return false;
+		
+		try{
+			Address addressObj = charityObj.getAddressObj();
+			ContactDetails detailsObj = charityObj.getContactDetailsObj();
+			UserLogin loginObj = charityObj.getLoginObj();
+			
+			Long objectTypeId = ObjectType.PMC.id();
+			if(loginObj.getUserTypeId() == UserType.SUPER_PMC.id())
+				objectTypeId = ObjectType.SUPER_PMC.id();
+			
+			loginObj.createPassword();
+			userLoginDAO.createLoginUser(loginObj, userId);
+			if(loginObj.getId() == null)
+				return false;
+			
+			userLoginDAO.createAuthority(new Authorities(loginObj.getUsername(), "ALL"));
+			charityObj.setUserLoginId(loginObj.getId());
+			charityObj.setUniqueReference(gereratorDAO.getUniqueReference(IdentityGeneratorObjective.PMC.value()));
+			pmcDAO.createPMC(charityObj, userId);
+			
+			if(charityObj.getId() == null){
+				userLoginDAO.deleteLoginUser(loginObj.getId());
+				return false;
+			}
+			
+			charityObj.setId(charityObj.getId());
+				addressObj.setObjectId(charityObj.getId());
+				addressObj.setObjectType(objectTypeId);
+			addressDAO.createAddress(addressObj, userId);
+			
+				detailsObj.setObjectId(charityObj.getId());
+				detailsObj.setObjectType(objectTypeId);
+			contactDetailsDAO.createContactDetails(detailsObj, userId);
+			
+			UserLogin userLoginObj = userLoginDAO.findLoginUserById(userId);
+			charityObj = loadPMCById(charityObj.getId());
+			if(charityObj != null){
+				UserLogin tempLoginObj = charityObj.getLoginObj();
+				if(tempLoginObj != null){
+					if(objectTypeId == ObjectType.SUPER_PMC.id()){
+						SwingUtilities.invokeLater(new PMCMailUtility(charityObj, applicationSettings, mailSender, MailEventType.REGISTER, eventManager, templateEngine, commonManager, userLoginObj));
+					} else {
+						SwingUtilities.invokeLater(new SubPmcMailUtility(charityObj, this, applicationSettings, mailSender, MailEventType.REGISTER, eventManager, templateEngine, commonManager, userLoginObj));
+					}
+				}
+			}
+			return true;
+				
+		}catch (DuplicateKeyException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@Override
+	public boolean updatePMC(Charity charityObj, Long userId) {
+		if(charityObj != null){
+			pmcDAO.updatePMC(charityObj, userId);
+			Charity tempCharityObj = loadPMCById(charityObj.getId());
+			if(tempCharityObj != null){
+				UserLogin tempLoginObj = tempCharityObj.getLoginObj();
+				if(tempLoginObj != null){
+					Long objectTypeId  = ObjectType.PMC.id();
+					if(tempLoginObj.getUserTypeId() == UserType.SUPER_PMC.id())
+						objectTypeId = ObjectType.SUPER_PMC.id();
+					
+					Address addressObj = charityObj.getAddressObj();
+					if(addressObj != null){
+						addressObj.setObjectId(charityObj.getId());
+						addressObj.setObjectType(objectTypeId);
+						addressDAO.updateAddress(addressObj, userId);
+						ContactDetails detailsObj = charityObj.getContactDetailsObj();
+						if(detailsObj != null){
+							detailsObj.setObjectId(charityObj.getId());
+							detailsObj.setObjectType(objectTypeId);
+							contactDetailsDAO.updateContactDetails(detailsObj, userId);
+						}
+					}
+					charityObj = loadPMCById(charityObj.getId());
+					UserLogin userLoginObj = userLoginDAO.findLoginUserById(userId);
+					
+					SwingUtilities.invokeLater(new PMCMailUtility(charityObj, applicationSettings, mailSender, MailEventType.PROFILE_EDIT, eventManager, templateEngine, commonManager, userLoginObj));
+			
+				}
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public Charity loadPMCById(Long pmcId){
+		
+		Charity charityObj = pmcDAO.loadPMCById(pmcId);
+		if(charityObj == null || charityObj.getLoginObj() == null)
+			return null;
+		
+		Long objectTypeId = null;
+		
+		objectTypeId = ObjectType.PMC.id();
+		if(charityObj.getLoginObj().getUserTypeId() == UserType.SUPER_PMC.id())
+			objectTypeId = ObjectType.SUPER_PMC.id();
+		
+		List<Address> addressList = addressDAO.loadAddressById(objectTypeId, charityObj.getId());
+		if(addressList != null && !addressList.isEmpty())
+			charityObj.setAddressObj(addressList.get(0));
+		
+		List<ContactDetails> detailsList = contactDetailsDAO.loadById(objectTypeId, charityObj.getId());
+		if(detailsList != null && !detailsList.isEmpty())
+			charityObj.setContactDetailsObj(detailsList.get(0));
+		
+		List<City> cityList = cityDAO.loadCityByObjectId(objectTypeId, charityObj.getId());
+		if(cityList != null && !cityList.isEmpty()){
+			String cityString = "";
+			String cityIdStr = "";
+			String delim1 = "";
+			String delim2 = "";
+			for (City city : cityList) {
+				cityString += delim1 + city.getCity();
+				cityIdStr += delim2 + city.getCityId();
+				delim1 = ", ";
+				delim2 = ",";
+			}
+			charityObj.setCityList(cityList);
+			charityObj.setCitiesCovered(cityString);
+			charityObj.setCityCoveredId(cityIdStr);
+		}
+		
+		return charityObj;
+	
+	}
+	
+	@Override
+	public List<Charity> loadAllPMC(Integer start, Integer limit, UserLogin loginObj){
+		if(loginObj == null)
+			return null;
+		
+		List<Charity> pmcList = null;
+		if(loginObj.getUserTypeId() == UserType.SUPER_ADMIN.id()){
+			pmcList = pmcDAO.loadAllPMC(null, null, loginObj.getId());
+		}else if(loginObj.getUserTypeId() == UserType.ADMIN.id()){
+			Admin adminObj = userAdminDAO.loadAdminByLoginObj(loginObj);
+			if(adminObj != null)
+				pmcList = commonManager.loadPMCByAdmin(adminObj);
+		} else if(loginObj.getUserTypeId() == UserType.SUPER_PMC.id()){
+			Charity charityObj = pmcDAO.loadCharityByUserLogin(loginObj);
+			if(charityObj != null)
+				pmcList = pmcDAO.loadAllPMC(null, null, loginObj.getId());
+		}
+		
+		if(pmcList == null || pmcList.isEmpty())
+			return null;
+		
+		for (Charity charity : pmcList) {
+			UserLogin tempLoginObj = charity.getLoginObj();
+			if(tempLoginObj == null)
+				continue;
+
+			Long objectTypeId = ObjectType.PMC.id();
+			if(tempLoginObj.getUserTypeId() == UserType.SUPER_PMC.id())
+				objectTypeId = ObjectType.SUPER_PMC.id();
+			
+			List<Address> addressList = addressDAO.loadAddressById(objectTypeId, charity.getId());
+			if(addressList != null && !addressList.isEmpty())
+				charity.setAddressObj(addressList.get(0));
+			
+			List<ContactDetails> detailsList = contactDetailsDAO.loadById(objectTypeId, charity.getId());
+			if(detailsList != null && !detailsList.isEmpty())
+				charity.setContactDetailsObj(detailsList.get(0));
+			
+			List<City> cityList = cityDAO.loadCityByObjectId(objectTypeId, charity.getId());
+			if(cityList != null && !cityList.isEmpty()){
+				charity.setCityList(cityList);
+				String cityString = "";
+				String delim = "";
+				for (City city : cityList) {
+					cityString += delim + city.getCity();
+					delim = ", ";
+				}
+				charity.setCitiesCovered(cityString);
+			}
+		}
+		
+		return pmcList;
+	}
+	
+	@Override
+	public Charity loadCharityByUserLogin(UserLogin loginObj){
+		
+		Charity charity = pmcDAO.loadCharityByUserLogin(loginObj);
+		if(charity != null){
+			Long objectTypeId = ObjectType.PMC.id();
+			
+			if(loginObj.getUserTypeId() == UserType.SUPER_PMC.id())
+				objectTypeId = ObjectType.SUPER_PMC.id();
+
+			List<Address> addressList = addressDAO.loadAddressById(objectTypeId, charity.getId());
+			if(addressList != null && !addressList.isEmpty())
+				charity.setAddressObj(addressList.get(0));
+			
+			List<ContactDetails> detailsList = contactDetailsDAO.loadById(objectTypeId, charity.getId());
+			if(detailsList != null && !detailsList.isEmpty())
+				charity.setContactDetailsObj(detailsList.get(0));
+			
+			List<City> cityList = cityDAO.loadCityByObjectId(objectTypeId, charity.getId());
+			if(cityList != null && !cityList.isEmpty()){
+				String cityString = "";
+				String delim = "";
+				for (City city : cityList) {
+					cityString += delim + city.getCity();
+					delim = ", ";
+				}
+				charity.setCitiesCovered(cityString);
+			}
+		
+		}
+		return charity;
+	}
+	
+	@Override      
+	public boolean updatePMCCities(String[] cityIdArr, Long id, UserLogin userLoginObj) {
+		Boolean citiesExist = false;
+		Charity tCharityObj = loadPMCById(id);
+		
+		if (tCharityObj == null)
+			return false;
+		
+		UserLogin loginObj = tCharityObj.getLoginObj();
+		
+		if (loginObj == null)
+			return false;
+		
+		boolean execStatus = true;
+		Long tempId = null;
+		Long objectTypeId = ObjectType.PMC.id();
+		if (loginObj.getUserTypeId() == UserType.SUPER_PMC.id())
+			objectTypeId = ObjectType.SUPER_PMC.id();
+		
+		citiesExist = false;
+		List<City> existingCities = cityDAO.loadCityByObjectId(objectTypeId, id);
+		if (existingCities != null && !existingCities.isEmpty())
+			citiesExist = true;
+		
+		cityDAO.deleteCityByObjectType(objectTypeId, id);
+		if (cityIdArr != null && cityIdArr.length != 0) {
+			PerpetualCity pCityObj = null;
+			for (String cityId : cityIdArr) {
+				pCityObj = cityDAO.loadPerpetualCityById(Long.valueOf(cityId));
+				if (pCityObj == null)
+					continue;
+				
+				tempId = cityDAO.createCity(new City(pCityObj.getCity(), pCityObj.getId(), objectTypeId, id));
+				if (tempId == null) {
+					execStatus = false;
+					break;
+				}
+			}
+		}
+		
+		
+		tCharityObj = loadPMCById(id);
+		if(tCharityObj != null){
+			if (citiesExist) {
+				if (objectTypeId == ObjectType.SUPER_PMC.id())
+					SwingUtilities.invokeLater(new PMCMailUtility(tCharityObj, applicationSettings, mailSender, MailEventType.EDIT_CITY, eventManager, templateEngine, commonManager, userLoginObj));
+				else
+					SwingUtilities.invokeLater(new SubPmcMailUtility(tCharityObj, this, applicationSettings, mailSender, MailEventType.EDIT_CITY, eventManager, templateEngine, commonManager, userLoginObj));
+			} else {
+				if (objectTypeId == ObjectType.SUPER_PMC.id())
+					SwingUtilities.invokeLater(new PMCMailUtility(tCharityObj, applicationSettings, mailSender, MailEventType.ADD_CITY, eventManager, templateEngine, commonManager, userLoginObj));
+				else
+					SwingUtilities.invokeLater(new SubPmcMailUtility(tCharityObj, this, applicationSettings, mailSender, MailEventType.ADD_CITY, eventManager, templateEngine, commonManager, userLoginObj));
+			}
+		}
+		return execStatus;
+	}
+	
+	@Override
+	public List<PerpetualCity> loadAllCities() {
+		List<PerpetualCity> cityList = cityDAO.loadAllPerpetualCity();
+		if(cityList != null && !cityList.isEmpty()){
+			
+			return cityList;
+		}
+		return null;
+	}
+	
+	@Override
+	public List<City> loadPMCCities(Long pmcId){
+		List<City> cityList = cityDAO.loadCityByObjectId(ObjectType.SUPER_PMC.id(), pmcId);
+		if(cityList != null){
+			return cityList;
+		}
+		return null;
+	}
+	
+	@Override
+	public void enablePMC(Charity charityObj, Long userId) {
+		userLoginDAO.enableUser(charityObj.getUserLoginId(), userId);
+		pmcDAO.enablePMC(charityObj, userId);
+		UserLogin userLoginObj = userLoginDAO.findLoginUserById(userId);
+		SwingUtilities.invokeLater(new PMCMailUtility(charityObj, applicationSettings, mailSender, MailEventType.ENABLE, eventManager, templateEngine, commonManager, userLoginObj));
+	}
+
+	@Override
+	public void disablePMC(Charity charityObj, Long userId) {
+		userLoginDAO.disableUser(charityObj.getUserLoginId(), userId);
+		pmcDAO.disablePMC(charityObj, userId);
+		UserLogin userLoginObj = userLoginDAO.findLoginUserById(userId);
+		SwingUtilities.invokeLater(new PMCMailUtility(charityObj, applicationSettings, mailSender,MailEventType.DISABLE, eventManager, templateEngine, commonManager, userLoginObj));
+	}
+
+	@Override
+	public String resetPassword(Long id) {
+		Charity charityObj = pmcDAO.loadPMCById(id);
+		String password = null;
+		if(charityObj != null){
+		UserLogin loginObj = charityObj.getLoginObj();
+		if(loginObj != null){
+			loginObj.createPassword();
+			password = pmcDAO.updatePassword(charityObj);
+		}
+		}
+		return password;
+	}
+
+	
+
+	
+}

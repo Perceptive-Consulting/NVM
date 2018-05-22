@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+            
+                
+        <p>Dear Property Developer <span th:text="${propertyDeveloperName}"></span></p>
+		
+		<p> This is to notify you that your property details at <span th:text="${Address}"></span>  have been updated. </p>
+		
+		<p>Reference No : <span th:text="${reference}"></span></p>
+		
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     		     
+    </body>    
+</html>

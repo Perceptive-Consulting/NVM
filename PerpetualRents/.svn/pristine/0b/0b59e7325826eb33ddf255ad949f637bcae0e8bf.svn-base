@@ -1,0 +1,34 @@
+<script src="<%=request.getContextPath()%>/resource/perpetual/admin/pmc/subPMC/subpmcDetails.js"></script> 
+
+
+ <div class="container-ar">
+  <section class="contant-area">
+    <div class="button"><button id="subPMCDetailsBackBtn">Back</button><span>&nbsp;&nbsp;&nbsp;</span><button id="enableId">Enable</button>
+    <button id="disableId" style="display: none;">Disable</button><span>&nbsp;&nbsp;&nbsp;</span><button id="resetPassword">Reset Password</button></div>
+    <div class="rgpinnew">
+          <ul>
+            <li><strong>Company Name</strong><samp>:</samp><span id="companyName"></span></li>
+            <li><strong>Authorised Person</strong><samp>:</samp><span id="authorisedPerson"></span></li>
+            <li><strong>Reference Number</strong><samp>:</samp><span id="referenceNumber"></span></li>
+            <li><strong>Web URL</strong><samp>:</samp><span id="webURL"></span></li>
+            <li><strong>Enabled</strong><samp>:</samp><span id="enabled"></span></li>
+            <li><strong>Cities Covered</strong><samp>:</samp><span id="citiesCovered"></span></li>
+            <li><strong>UserName</strong><samp>:</samp><span id="userName"></span></li>
+            <li><strong>Password</strong><samp>:</samp><span id="password"></span></li>
+            <li><strong>EmailId</strong><samp>:</samp><span id="emailId"></span></li>
+            <li><strong>PhoneNumber</strong><samp>:</samp><span id="phoneNumber"></span></li>
+            <li><strong>Address Line1</strong><samp>:</samp><span id="addressLine1"></span></li>
+            <li><strong>AddressLine2</strong><samp>:</samp><span id="addressLine2"></span></li>
+            <li><strong>City</strong><samp>:</samp><span id="city"></span></li>
+            <li><strong>County</strong><samp>:</samp><span id="county"></span></li>
+            <li><strong>PostCode</strong><samp>:</samp><span id="postCode"></span></li>
+            <li><strong>Landmark</strong><samp>:</samp><span id="landmark"></span></li>
+            <li><strong>Created On</strong><samp>:</samp><span id="createdOn"></span></li>
+            <li id="createdById"><strong>Created By</strong><samp>:</samp><span id="createdBy"></span></li>
+            <li><strong>Modified On</strong><samp>:</samp><span id="modifiedOn"></span></li>
+            <li id="modifiedById"><strong>Modified By</strong><samp>:</samp><span id="modifiedBy"></span></li>
+          </ul>
+          <div class="clearfix"></div>
+        </div>    
+  </section>
+  </div>

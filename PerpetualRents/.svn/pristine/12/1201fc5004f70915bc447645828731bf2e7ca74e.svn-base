@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+    
+        <!-- 
+	         Dear {admin first and second name}, this is to notify you that the {super admin first and second name} has updated the 
+	         property details of {Landlord first name and second name} of {postcode} and this may not have updated the status 
+	         of this property, however, if the SA actions have changed the status,  this  has updated the property details 
+	         and the property application process to [Status-> 80 % complete; 60% Complete; 100 % complete etc] 
+        -->
+        
+         Dear <span th:text="${adminName}"></span>, this is to notify you that the <span th:text="${superAdminName}"></span> has updated the 
+	     property details of <span th:text="${landlordName}"></span> of <span th:text="${posrCode}"></span> and this may not have updated the status 
+	     of this property, however, if the SA actions have changed the status,  this  has updated the property details 
+	     and the property application process to <span th:text="${status}"></span> complete.
+        
+		<p>&nbsp;</p>
+
+		<p>Thanks</p>
+
+		<p>Admin</span></p>
+					
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

@@ -1,0 +1,787 @@
+package com.pcs.perpetualRents.util.mail;
+
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.mail.internet.MimeMessage;
+
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring3.SpringTemplateEngine;
+
+import com.pcs.perpetualRents.business.bean.Address;
+import com.pcs.perpetualRents.business.bean.Admin;
+import com.pcs.perpetualRents.business.bean.Charity;
+import com.pcs.perpetualRents.business.bean.ContactDetails;
+import com.pcs.perpetualRents.business.bean.Contractor;
+import com.pcs.perpetualRents.business.bean.Conversation;
+import com.pcs.perpetualRents.business.bean.Mail;
+import com.pcs.perpetualRents.business.bean.MailEventConfiguration;
+import com.pcs.perpetualRents.business.bean.PDProperty;
+import com.pcs.perpetualRents.business.bean.Property;
+import com.pcs.perpetualRents.business.bean.PropertyDeveloper;
+import com.pcs.perpetualRents.business.bean.UserLogin;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.dao.MailDAO;
+import com.pcs.perpetualRents.enm.MailEventActor;
+import com.pcs.perpetualRents.enm.MailEventType;
+import com.pcs.perpetualRents.enm.MailFlowType;
+import com.pcs.perpetualRents.enm.UserType;
+import com.pcs.perpetualRents.manager.CommonManager;
+import com.pcs.perpetualRents.manager.MailEventManager;
+
+
+//http://ckeditor.com/demo
+public class PropertyDeveloperMailUtility implements Runnable {
+	
+	private static Logger logger = ApplicationSettings.getLogger(PropertyDeveloperMailUtility.class.getName()); 
+	
+	private JavaMailSender mailSender;
+	private PropertyDeveloper properydeveloperObj;
+	private ApplicationSettings applicationSettings;
+	private MailEventType mailEventType;
+	private SpringTemplateEngine templateEngine;
+	private List<Contractor> contractorList;
+	private Map<Long,Conversation> conversationMap;
+	private Property propertyObj;
+	private MailDAO mailDAO; 
+	private MailEventManager eventManager;
+	private CommonManager commonManager;
+	//private static int counter = 0; 
+	private Charity charityObj;
+	private UserLogin userLoginObj;
+	//private UserAdminManager userAdminManager;
+	private PDProperty pdpropertyObj;
+	private String propertyDeveloperUniqueReference;
+	
+		
+	
+	public PropertyDeveloperMailUtility() {
+		super();
+	}
+	
+	public PropertyDeveloperMailUtility(final PropertyDeveloper properydeveloperObj,final ApplicationSettings settingsObj, final JavaMailSender mailSender,
+			MailEventType mailEventType, final MailEventManager eventManager, SpringTemplateEngine templateEngine, CommonManager commonManager,UserLogin userLoginObj) {
+		this.mailSender = mailSender;
+		this.properydeveloperObj = properydeveloperObj;
+		this.applicationSettings = settingsObj;
+		this.mailEventType = mailEventType;
+		this.templateEngine = templateEngine;
+		this.eventManager = eventManager;
+		this.commonManager = commonManager;
+		this.userLoginObj  = userLoginObj;
+		
+	}
+	
+	public PropertyDeveloperMailUtility(final PropertyDeveloper properydeveloperObj,PDProperty pdpropertyObj,final ApplicationSettings settingsObj,final JavaMailSender mailSender,
+			MailEventType mailEventType, final MailEventManager eventManager, SpringTemplateEngine templateEngine, CommonManager commonManager,UserLogin userLoginObj) {
+		this.mailSender = mailSender;
+		this.properydeveloperObj = properydeveloperObj;
+		this.pdpropertyObj = pdpropertyObj;
+		this.applicationSettings = settingsObj;
+		this.mailEventType = mailEventType;
+		this.templateEngine = templateEngine;
+		this.eventManager = eventManager;
+		this.commonManager = commonManager;
+		this.userLoginObj  = userLoginObj;
+		
+	}
+	
+	public PropertyDeveloperMailUtility(final PropertyDeveloper properydeveloperObj ,final PDProperty pdpropertyObj,final String propertyDeveloperUniqueReference, final ApplicationSettings settingsObj, final JavaMailSender mailSender,
+			MailEventType mailEventType, final MailEventManager eventManager, SpringTemplateEngine templateEngine, CommonManager commonManager,UserLogin userLoginObj) 
+	{
+		this.properydeveloperObj = properydeveloperObj;
+		this.pdpropertyObj = pdpropertyObj;
+		this.propertyDeveloperUniqueReference=propertyDeveloperUniqueReference;
+		this.applicationSettings = settingsObj;
+		this.mailSender = mailSender;
+		this.mailEventType = mailEventType;
+		this.templateEngine = templateEngine;
+		this.eventManager = eventManager;
+		this.commonManager = commonManager;
+		this.userLoginObj = userLoginObj;
+	}
+
+	
+	
+	public PropertyDeveloperMailUtility(final PropertyDeveloper properydeveloperObj, final ApplicationSettings settingsObj, final JavaMailSender mailSender, MailEventType mailEventType, 
+			SpringTemplateEngine templateEngine,List<Contractor> contractorList,Map<Long,Conversation> conversationMap,Property propertyObj,MailDAO mailDAO) {
+		this.mailSender = mailSender;
+		
+		this.applicationSettings = settingsObj;
+		this.mailEventType = mailEventType;
+		this.templateEngine = templateEngine;
+		this.contractorList = contractorList;
+		this.conversationMap = conversationMap;
+		this.propertyObj = propertyObj;
+		this.mailDAO  = mailDAO;
+	}
+	
+	@Override 
+	public void run() {
+		Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+		try{
+			logger.info("MAIL-THREAD has been started.");
+			if(mailEventType.id() == MailEventType.SEND_QUOTATION.id()){
+				contractorQuotation();
+			}else{
+				List<MailEventConfiguration> mailConfList = eventManager.loadMailEventByEventType(mailEventType, MailEventActor.PROPERTY_DEVELOPER);
+				System.out.println("Mail List : " + mailConfList);
+				if(mailConfList != null && !mailConfList.isEmpty()){
+					for (MailEventConfiguration _mailConfObj : mailConfList) {
+						System.out.println(_mailConfObj.toString());
+						if(_mailConfObj.getMailEventTypeId() == MailEventType.REGISTER.id()){
+							logger.info("Mailer has been initialized to send mail for LANDLORD REGISTERATION");
+							propertyDeveloperRegisteration(MailEventActor.get(_mailConfObj.getActorTypeId()));
+						}else if(_mailConfObj.getMailEventTypeId() == MailEventType.EDIT.id()){
+							logger.info("Mailer has been initialized to send mail for Property Developer Edit Documentss");
+							editpropertyDeveloperDocuments(MailEventActor.get(_mailConfObj.getActorTypeId()));
+						}else if(_mailConfObj.getMailEventTypeId() == MailEventType.UPLOAD.id()){
+							logger.info("Mailer has been initialized to send mail for UPLOAD Information");
+							uploadepropertyDeveloperDocuments(MailEventActor.get(_mailConfObj.getActorTypeId()));
+						}
+						else if(_mailConfObj.getMailEventTypeId() == MailEventType.APPROVE.id())
+						{
+							logger.info("Mailer has been initialized to send mail for LANDLORD PASSWORD CHANGE");
+							approvePropertyDeveloperDocuments(MailEventActor.get(_mailConfObj.getActorTypeId()));
+						}
+						else if(_mailConfObj.getMailEventTypeId() == MailEventType.ADMIN_UPLOAD_FOR_PDPROPERTY.id())
+						{
+							logger.info("Mailer has been initialized to send mail for ADMIN UPLOAD FOR PD PROPERTY");
+							uploadDocumentsBySuperAdmin(MailEventActor.get(_mailConfObj.getActorTypeId()));
+						}
+					}
+				}else {
+					logger.severe("No configuration found for MAIL..");
+				}
+				
+				logger.finest("MAIL THREAD COMPLETED.");
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			logger.log(Level.SEVERE, "Some error has been occured" + e.getMessage());
+		}
+	}
+	
+	private void propertyDeveloperRegisteration(MailEventActor actor){
+				try{
+				   	MimeMessage mimeMessage = mailSender.createMimeMessage();
+					MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+					
+					 Context ctx = new Context();
+					 logger.info("ACTOR IS " + MailEventActor.get(actor.id()) + " ID IS " + actor.id());
+					 
+			   switch(actor){
+			   		
+			   case PROPERTY_DEVELOPER : 
+				   
+					 if(properydeveloperObj != null){
+							 ctx.setVariable("receiverName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+							UserLogin loginObj = properydeveloperObj.getLoginObj();
+								  if(loginObj != null){
+									  ctx.setVariable("username", loginObj.getUsername());
+									  ctx.setVariable("password", loginObj.getPassword());
+									  
+								  }
+							  }
+							  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+							  if(properydeveloperObj.getPrimaryEmailId() != null && properydeveloperObj.getPrimaryEmailId().length() != 0)
+								  mimeMessageHelper.setTo(properydeveloperObj.getPrimaryEmailId());
+							  
+							  if(properydeveloperObj.getSecondaryEmailId() != null && properydeveloperObj.getSecondaryEmailId().length() != 0 && properydeveloperObj.getSecondaryEmailId().contains("@"))
+								  mimeMessageHelper.setBcc(properydeveloperObj.getSecondaryEmailId());
+							  
+							  mimeMessageHelper.setSubject("Email From Perpetual");
+							  this.templateEngine.initialize();
+							  final String htmlContent = this.templateEngine.process("propertyDeveloper/propertyDeveloperRegisteration.html", ctx);
+							  mimeMessageHelper.setText(htmlContent, true); // true = isHtml
+							 
+							  mailSender.send(mimeMessage);
+							  logger.info("LANDLORD : MAIL is sending to " + properydeveloperObj.getPrimaryEmailId());
+					  
+				   break;
+				   
+			
+			   case SUPER_ADMIN:
+				  
+				   if(properydeveloperObj != null){
+					   Admin superAdminObj = commonManager.loadsuperAdmin();
+					   if(superAdminObj != null){
+						   
+						      ctx.setVariable("receiverName", superAdminObj.getFirstName());
+							  ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+							  ctx.setVariable("Address", properydeveloperObj.getAddressObj().getAddressLine1()+"   "+"   "+properydeveloperObj.getAddressObj().getPostCode());
+							  System.out.println("property sdkfmkkfsieki================="+properydeveloperObj.getAddressObj().getAddressLine1()+"   "+"   "+properydeveloperObj.getAddressObj().getPostCode());
+							  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+							  
+						  String emailId = "";
+						  ContactDetails detailsObj = superAdminObj.getContactDetailsObj();
+						  if(detailsObj != null){
+							  emailId = detailsObj.getEmailId();
+						  }
+						  else
+						  {
+							   logger.severe("SUPER ADMIN : No MAIL ID FOUND.");
+						  }
+						 // List<PDProperty> pmcObj = commonManager.loadProposedPropertyByPMC(charityObj);
+						 
+						 // System.out.println("charityObj is  "+pmcObj);
+						  
+						  mimeMessageHelper.setTo(emailId);
+						  mimeMessageHelper.setSubject("Email From Perpetual");
+						  this.templateEngine.initialize();
+						  
+						  final String htmlContent2 = this.templateEngine.process("propertyDeveloper/propertyDeveloperRegister-superadmin.html", ctx);
+						  mimeMessageHelper.setText(htmlContent2, true); // true = isHtml
+						 			  
+						  mailSender.send(mimeMessage);
+						  
+						  logger.info("SUPER ADMIN : MAIL is sending to " + emailId);
+					   }
+				   }
+				  
+					 break;
+				  }
+			   }catch(Exception e){
+					e.printStackTrace();
+				}
+	   }
+	   
+	public void editpropertyDeveloperDocuments(MailEventActor actor){
+		   try{
+			   		String propRef="";
+				   	MimeMessage mimeMessage = mailSender.createMimeMessage();
+					MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+					
+					Context ctx = new Context();
+					logger.info("EDITING : SENDING MAIL TO " + actor.value().toUpperCase());
+					Admin superAdminObj = commonManager.loadsuperAdmin();
+					
+			   switch(actor){
+			   		
+			   case PROPERTY_DEVELOPER : 
+				  
+				   if(properydeveloperObj != null){
+					   
+					   System.out.println("inside properydeveloperObj==============="+properydeveloperObj);
+					   ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+					   ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+					   UserLogin loginObj = properydeveloperObj.getLoginObj();
+						  if(loginObj != null){
+							  ctx.setVariable("username", loginObj.getUsername());
+							  ctx.setVariable("password", loginObj.getPassword());
+						  }
+						  }
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  ctx.setVariable("superAdminName", superAdminObj.getFirstName() + "" + superAdminObj.getLastName());
+						  
+						  mimeMessageHelper.setTo(properydeveloperObj.getPrimaryEmailId());
+						  if(properydeveloperObj.getSecondaryEmailId() != null && properydeveloperObj.getSecondaryEmailId().contains("@"))
+							  mimeMessageHelper.setBcc(properydeveloperObj.getSecondaryEmailId());
+						  
+						  if(propertyDeveloperUniqueReference!=null)
+							{
+								propRef=propRef+propertyDeveloperUniqueReference;
+								System.out.println("inside property mail utility "+propRef);
+								ctx.setVariable("propertyDeveloperUniqueReference", propRef);
+							}
+						  
+						  mimeMessageHelper.setSubject("Email From Perpetual");
+						  
+						  if(userLoginObj.getUserTypeId() == UserType.SUPER_ADMIN.id() || userLoginObj.getUserTypeId() == UserType.ADMIN.id()) {
+							  final String htmlContent = this.templateEngine.process("propertyDeveloper/propertyDeveloperEdit-updatedBySuperAdmin.html", ctx);
+							  mimeMessageHelper.setText(htmlContent, true); // true = isHtml
+						  } else {
+							  final String htmlContent = this.templateEngine.process("propertyDeveloper/propertyDeveloperEditDocuments.html", ctx);
+							  mimeMessageHelper.setText(htmlContent, true); // true = isHtml
+						  }
+						   
+						  mailSender.send(mimeMessage);
+						  logger.info("LANDLORD : MAIL is sending to " + properydeveloperObj.getPrimaryEmailId());
+					  
+				   break;
+				   
+			   
+			   case SUPER_ADMIN:
+				   
+				   if(properydeveloperObj != null){
+					   
+					   if(superAdminObj != null){
+						      
+						      ctx.setVariable("receiverName", superAdminObj.getFirstName());
+							  ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+							  ctx.setVariable("adminName", superAdminObj.getFirstName() + "" + superAdminObj.getLastName());
+							  ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+							  
+							  
+						  
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  String emailId = "";
+						  ContactDetails detailsObj = superAdminObj.getContactDetailsObj();
+						  if(detailsObj != null){
+							  emailId = detailsObj.getEmailId();
+						  }
+						  mimeMessageHelper.setTo(emailId);
+						  mimeMessageHelper.setSubject("Email From Perpetual");
+						  this.templateEngine.initialize();
+						  
+						  if(propertyDeveloperUniqueReference!=null)
+							{
+								propRef=propRef+propertyDeveloperUniqueReference;
+								System.out.println("inside property mail utility "+propRef);
+								ctx.setVariable("propertyDeveloperUniqueReference", propRef);
+							}
+						  
+						  if(userLoginObj.getUserTypeId() == UserType.SUPER_ADMIN.id() || userLoginObj.getUserTypeId() == UserType.ADMIN.id()) {
+							  final String htmlContent2 = this.templateEngine.process("propertyDeveloper/propertyDeveloperEdit-superadmin-updatedBySuperAdmin.html", ctx);
+							  mimeMessageHelper.setText(htmlContent2, true); // true = isHtml
+						  } else {
+							  final String htmlContent2 = this.templateEngine.process("propertyDeveloper/propertyDeveloperEditDocuments-superadmin.html", ctx);
+							  mimeMessageHelper.setText(htmlContent2, true); // true = isHtml
+						  }
+						  
+						  mailSender.send(mimeMessage);
+						  
+						  logger.info("SUPER ADMIN : MAIL is sending to " + emailId);
+					   }
+				   }
+				   break;
+			   }
+		   }catch(Exception e){
+				e.printStackTrace();
+			}
+	   }
+	
+	public void approvePropertyDeveloperDocuments(MailEventActor actor){
+		   try{
+				   	MimeMessage mimeMessage = mailSender.createMimeMessage();
+					MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+					
+					 Context ctx = new Context();
+					  System.out.println("actor " + actor);
+					
+			   switch(actor){
+			   		
+			   case PROPERTY_DEVELOPER : 
+				  
+				   if(properydeveloperObj != null){
+					   ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+					   ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+						UserLogin loginObj = properydeveloperObj.getLoginObj();
+							  if(loginObj != null){
+								  ctx.setVariable("username", loginObj.getUsername());
+								  ctx.setVariable("password", loginObj.getPassword());
+						  }
+						  }
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  String landlordEmailId = "";
+						  if(properydeveloperObj.getPrimaryEmailId() != null && properydeveloperObj.getPrimaryEmailId().contains("@")){
+							  landlordEmailId = properydeveloperObj.getPrimaryEmailId();
+						  	}
+							  mimeMessageHelper.setTo(landlordEmailId);
+							  
+						  if(properydeveloperObj.getSecondaryEmailId() != null && properydeveloperObj.getSecondaryEmailId().contains("@"))
+							  mimeMessageHelper.setBcc(properydeveloperObj.getSecondaryEmailId());
+						  if(pdpropertyObj!=null)
+						  {
+							  ctx.setVariable("Address", pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode());
+							 // String pdpropertyUniqueReference=pdpropertyObj.getUniqueReference();
+							  ctx.setVariable("PropertyID",pdpropertyObj.getUniqueReference());
+						  }
+						  
+						  mimeMessageHelper.setSubject("Email From Perpetual.");
+						  
+						  final String htmlContent = this.templateEngine.process("propertyDeveloper/approvePropertyDeveloperDocuments.html", ctx);
+						  mimeMessageHelper.setText(htmlContent, true); // true = isHtml
+						 
+						  mailSender.send(mimeMessage);
+						  logger.info("PROPERTY DEVELOPER UPLOAD DOCUMENTS  : MAIL is sending to " + landlordEmailId);
+					  
+				   break;
+				   
+			  
+			   case SUPER_ADMIN:
+				   
+				   if(properydeveloperObj != null){
+					   Admin superAdminObj = commonManager.loadsuperAdmin();
+					   if(superAdminObj != null){
+						   
+						      ctx.setVariable("receiverName", superAdminObj.getFirstName());
+							  ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+							  ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+							  UserLogin loginObj = properydeveloperObj.getLoginObj();
+							  if(loginObj != null){
+								  ctx.setVariable("username", loginObj.getUsername());
+							  }
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  String emailId = "";
+						  ContactDetails detailsObj = superAdminObj.getContactDetailsObj();
+						  if(detailsObj != null){
+							  emailId = detailsObj.getEmailId();
+						  }
+						  if(pdpropertyObj!=null)
+						  {
+							  ctx.setVariable("Address", pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode());  
+							  ctx.setVariable("PropertyID",pdpropertyObj.getUniqueReference());
+						  }
+						
+						  mimeMessageHelper.setTo(emailId);
+						  mimeMessageHelper.setSubject("Email From Perpetual");
+						  this.templateEngine.initialize();
+						  final String htmlContent2 = this.templateEngine.process("propertyDeveloper/approvePropertyDeveloperDocuments-superadmin.html", ctx);
+						  mimeMessageHelper.setText(htmlContent2, true); // true = isHtml
+						 			  
+						  mailSender.send(mimeMessage);
+						  
+						  logger.info("SUPER ADMIN : MAIL is sending to " + emailId);
+					   }
+				   }
+				   break;
+				   
+			   case PMC_ADMIN:
+				   
+				   if(charityObj != null){
+					   
+					   System.out.println("sfjsjfs");
+					/*   List<PDProperty> pmcObj = commonManager.loadProposedPropertyByPMC(charityObj);
+					   if(pmcObj != null && ! pmcObj.isEmpty()){
+						   for (PDProperty  pdproperty : pmcObj) {
+
+							   ctx.setVariable("name", pdproperty.getFirstName() + " " + pdproperty.getLastName());
+							   ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+							   if(properydeveloperObj.getLoginObj() != null)
+								  ctx.setVariable("userName", properydeveloperObj.getLoginObj().getUsername());
+							  
+							  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+							  
+							  ContactDetails detailsObj = admin.getContactDetailsObj();
+							  String subAdminEmailId = "";
+							  if(detailsObj != null){
+								  subAdminEmailId = detailsObj.getEmailId();
+								  mimeMessageHelper.setTo(subAdminEmailId);
+							  }else{
+								  subAdminEmailId = applicationSettings.getAdminEmailId();
+								  mimeMessageHelper.setTo(applicationSettings.getAdminEmailId());  
+							  }
+							  mimeMessageHelper.setSubject("Email From Perpetual");
+							  this.templateEngine.initialize();
+							  final String htmlContent1 = this.templateEngine.process("landlord/landlordEdit-admin.html", ctx);
+							  mimeMessageHelper.setText(htmlContent1, true); // true = isHtml
+							 			  
+							  mailSender.send(mimeMessage);
+							  logger.info("ADMIN : MAIL is sending to " + subAdminEmailId);
+						   
+						}
+					   }*/
+				   }
+				   break;   
+			   }
+		   }catch(Exception e){
+				e.printStackTrace();
+			}
+	  }
+	
+	
+	
+	
+	public void uploadepropertyDeveloperDocuments(MailEventActor actor){
+		   try{
+				   	MimeMessage mimeMessage = mailSender.createMimeMessage();
+					MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+					
+					 Context ctx = new Context();
+					  System.out.println("actor " + actor);
+					
+			   switch(actor){
+			   		
+			   case PROPERTY_DEVELOPER: 
+				  
+				   if(properydeveloperObj != null){
+					   ctx.setVariable("name", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+					   ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+						UserLogin loginObj = properydeveloperObj.getLoginObj();
+							  if(loginObj != null){
+								  ctx.setVariable("username", loginObj.getUsername());
+								  ctx.setVariable("password", loginObj.getPassword());
+						  }
+						  }
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  String landlordEmailId = "";
+						  if(properydeveloperObj.getPrimaryEmailId() != null && properydeveloperObj.getPrimaryEmailId().contains("@")){
+							  landlordEmailId = properydeveloperObj.getPrimaryEmailId();
+						  }
+							  mimeMessageHelper.setTo(landlordEmailId);
+							  
+						  if(properydeveloperObj.getSecondaryEmailId() != null && properydeveloperObj.getSecondaryEmailId().contains("@"))
+							  mimeMessageHelper.setBcc(properydeveloperObj.getSecondaryEmailId());
+						  if(pdpropertyObj!=null)
+						  {
+							  ctx.setVariable("Address", pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode()); 
+							  System.out.println("sfsfjsjf========"+pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode());
+						  }
+						  
+						  mimeMessageHelper.setSubject("Email From Perpetual.");
+						  
+						  final String htmlContent = this.templateEngine.process("propertyDeveloper/propertyDeveloperUploadDocumentsRegister.html", ctx);
+						  mimeMessageHelper.setText(htmlContent, true); // true = isHtml
+						 
+						  mailSender.send(mimeMessage);
+						  logger.info("PROPERTY DEVELOPER UPLOAD DOCUMENTS  : MAIL is sending to " + landlordEmailId);
+					  
+				   break;
+				   
+			  
+			   case SUPER_ADMIN:
+				   
+				   if(properydeveloperObj != null){
+					   Admin superAdminObj = commonManager.loadsuperAdmin();
+					   if(superAdminObj != null){
+						   
+						      ctx.setVariable("receiverName", superAdminObj.getFirstName());
+							  ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+							  ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+							  UserLogin loginObj = properydeveloperObj.getLoginObj();
+							  if(loginObj != null){
+								  ctx.setVariable("username", loginObj.getUsername());
+							  }
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  String emailId = "";
+						  ContactDetails detailsObj = superAdminObj.getContactDetailsObj();
+						  if(detailsObj != null){
+							  emailId = detailsObj.getEmailId();
+						  }
+						  if(pdpropertyObj!=null)
+						  {
+							  ctx.setVariable("Address", pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode());
+							  System.out.println("sfsfjsjf========"+pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode());
+						  }
+						
+						  mimeMessageHelper.setTo(emailId);
+						  mimeMessageHelper.setSubject("Email From Perpetual");
+						  this.templateEngine.initialize();
+						  final String htmlContent2 = this.templateEngine.process("propertyDeveloper/propertyDeveloperUploadDocumentsRegister-superadmin.html", ctx);
+						  mimeMessageHelper.setText(htmlContent2, true); // true = isHtml
+						 			  
+						  mailSender.send(mimeMessage);
+						  
+						  logger.info("SUPER ADMIN : MAIL is sending to " + emailId);
+					   }
+				   }
+				   break;
+				   
+			   case PMC_ADMIN:
+				   
+				   if(charityObj != null){
+					   
+					   System.out.println("sfjsjfs");
+					/*   List<PDProperty> pmcObj = commonManager.loadProposedPropertyByPMC(charityObj);
+					   if(pmcObj != null && ! pmcObj.isEmpty()){
+						   for (PDProperty  pdproperty : pmcObj) {
+
+							   ctx.setVariable("name", pdproperty.getFirstName() + " " + pdproperty.getLastName());
+							   ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+							   if(properydeveloperObj.getLoginObj() != null)
+								  ctx.setVariable("userName", properydeveloperObj.getLoginObj().getUsername());
+							  
+							  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+							  
+							  ContactDetails detailsObj = admin.getContactDetailsObj();
+							  String subAdminEmailId = "";
+							  if(detailsObj != null){
+								  subAdminEmailId = detailsObj.getEmailId();
+								  mimeMessageHelper.setTo(subAdminEmailId);
+							  }else{
+								  subAdminEmailId = applicationSettings.getAdminEmailId();
+								  mimeMessageHelper.setTo(applicationSettings.getAdminEmailId());  
+							  }
+							  mimeMessageHelper.setSubject("Email From Perpetual");
+							  this.templateEngine.initialize();
+							  final String htmlContent1 = this.templateEngine.process("landlord/landlordEdit-admin.html", ctx);
+							  mimeMessageHelper.setText(htmlContent1, true); // true = isHtml
+							 			  
+							  mailSender.send(mimeMessage);
+							  logger.info("ADMIN : MAIL is sending to " + subAdminEmailId);
+						   
+						}
+					   }*/
+				   }
+				   break;
+				   
+				   
+			   }
+		   }catch(Exception e){
+				e.printStackTrace();
+			}
+	  }
+	
+	
+	public void uploadDocumentsBySuperAdmin(MailEventActor actor){
+		   try{
+				   	MimeMessage mimeMessage = mailSender.createMimeMessage();
+					MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+					
+					 Context ctx = new Context();
+					  System.out.println("actor " + actor);
+					
+			   switch(actor){
+			   		
+			   case PROPERTY_DEVELOPER : 
+				  
+				   if(properydeveloperObj != null){
+					   ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+					   ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+						UserLogin loginObj = properydeveloperObj.getLoginObj();
+							  if(loginObj != null){
+								  ctx.setVariable("username", loginObj.getUsername());
+								  ctx.setVariable("password", loginObj.getPassword());
+						  }
+						  }
+				   		 Admin superAdminObj1 = commonManager.loadsuperAdmin();
+				   		 if(superAdminObj1 != null){
+					   
+					      ctx.setVariable("receiverName", superAdminObj1.getFirstName());
+						 
+						  }
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  String landlordEmailId = "";
+						  if(properydeveloperObj.getPrimaryEmailId() != null && properydeveloperObj.getPrimaryEmailId().contains("@")){
+							  landlordEmailId = properydeveloperObj.getPrimaryEmailId();
+						  	}
+							  mimeMessageHelper.setTo(landlordEmailId);
+							  
+						  if(properydeveloperObj.getSecondaryEmailId() != null && properydeveloperObj.getSecondaryEmailId().contains("@"))
+							  mimeMessageHelper.setBcc(properydeveloperObj.getSecondaryEmailId());
+						  if(pdpropertyObj!=null)
+						  {
+							  ctx.setVariable("Address", pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode());
+							 // String pdpropertyUniqueReference=pdpropertyObj.getUniqueReference();
+							  ctx.setVariable("PropertyID",pdpropertyObj.getUniqueReference());
+						  }
+						  
+						  mimeMessageHelper.setSubject("Email From Perpetual.");
+						  
+						  final String htmlContent = this.templateEngine.process("propertyDeveloper/uploadDocumentsBySuperAdmin-propertyDeveloper.html", ctx);
+						  mimeMessageHelper.setText(htmlContent, true); // true = isHtml
+						 
+						  mailSender.send(mimeMessage);
+						  logger.info("PROPERTY DEVELOPER UPLOAD DOCUMENTS  : MAIL is sending to " + landlordEmailId);
+					  
+				   break;
+				   
+			  
+			   case SUPER_ADMIN:
+				   
+				   if(properydeveloperObj != null){
+					   Admin superAdminObj = commonManager.loadsuperAdmin();
+					   if(superAdminObj != null){
+						   
+						      ctx.setVariable("receiverName", superAdminObj.getFirstName());
+							  ctx.setVariable("propertyDeveloperName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+							  ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+							  UserLogin loginObj = properydeveloperObj.getLoginObj();
+							  if(loginObj != null){
+								  ctx.setVariable("username", loginObj.getUsername());
+							  }
+						  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+						  String emailId = "";
+						  ContactDetails detailsObj = superAdminObj.getContactDetailsObj();
+						  if(detailsObj != null){
+							  emailId = detailsObj.getEmailId();
+						  }
+						  if(pdpropertyObj!=null)
+						  {
+							  ctx.setVariable("Address", pdpropertyObj.getAddressObj().getAddressLine1() + " " + " " + pdpropertyObj.getAddressObj().getPostCode());  
+							  ctx.setVariable("PropertyID",pdpropertyObj.getUniqueReference());
+						  }
+						
+						  mimeMessageHelper.setTo(emailId);
+						  mimeMessageHelper.setSubject("Email From Perpetual");
+						  this.templateEngine.initialize();
+						  final String htmlContent2 = this.templateEngine.process("propertyDeveloper/uploadDocumentsBySuperAdmin-superadmin.html", ctx);
+						  mimeMessageHelper.setText(htmlContent2, true); // true = isHtml
+						 			  
+						  mailSender.send(mimeMessage);
+						  
+						  logger.info("SUPER ADMIN : MAIL is sending to " + emailId);
+					   }
+				   }
+				   break;
+				   
+			    
+			   }
+		   }catch(Exception e){
+				e.printStackTrace();
+			}
+	  }
+	
+	
+	
+	
+	public void contractorQuotation(){
+		   try{
+				  MimeMessage mimeMessage = mailSender.createMimeMessage();
+				  MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+				  Conversation conversation = null;
+				  final Context ctx = new Context();
+				  
+				  if(contractorList !=null && contractorList.size()>0){
+					  
+					  for(Contractor contractor : contractorList){
+						  ContactDetails contactDetails = contractor.getContactDetailsObj();
+						  String contractorMailId = contactDetails.getEmailId();
+						  conversation = conversationMap.get(contractor.getId());
+						  mimeMessageHelper.setTo(contractorMailId);
+						  mimeMessageHelper.setSubject(""+conversation.getConversationIdentity());
+						  
+						  if(properydeveloperObj != null){
+							  ctx.setVariable("receiverName", properydeveloperObj.getFirstName() + " " + properydeveloperObj.getLastName());
+							  ctx.setVariable("reference", properydeveloperObj.getUniqueReference());
+						  }
+					  
+						  Address addressObj = propertyObj.getAddressObj();
+						  if(addressObj!=null){
+							  ctx.setVariable("postcode", addressObj.getPostCode());
+							  ctx.setVariable("functionality", contractor.getExpertiseObj().getFunctionality());
+							  ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());  
+						  }
+						  
+										  
+						  this.templateEngine.initialize();
+						  final String htmlContent = this.templateEngine.process("landlord/contractor-quotation.html", ctx);
+						  mimeMessageHelper.setText(htmlContent, true); 
+						 			  
+						  mailSender.send(mimeMessage);
+						  
+						 
+							  Mail mail = new Mail();
+							  
+							  mail.setMailTo(contractorMailId);
+							  mail.setMailFrom(properydeveloperObj.getPrimaryEmailId());
+							  mail.setSubject(conversation.getConversationIdentity());
+							  mail.setMailBody(htmlContent);
+							  mail.setMailOrigin(applicationSettings.getControlEmailId());
+							  mail.setMailFlowType((short)MailFlowType.SEND.id());
+							  mail.setMailEventActor((short)MailEventActor.LANDLORD.id());
+							  mail.setMailEventType((short)MailEventType.SEND_QUOTATION.id());
+							  mail.setAttachmentCount(0);
+							  mail.setMailMessageId(null);
+							  mail.setMailMessageReference(null);
+							  mail.setConversationId(conversation.getId());
+							  mailDAO.saveMail(mail);
+						  
+						  
+						  logger.info("MAIL is send to " + contractorMailId);
+					  }
+				  }
+				  
+				 			 
+				 
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+	   }
+	
+}

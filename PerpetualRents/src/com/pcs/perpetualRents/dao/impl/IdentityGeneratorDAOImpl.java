@@ -1,0 +1,110 @@
+package com.pcs.perpetualRents.dao.impl;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+
+import com.pcs.perpetualRents.business.bean.IdentityGenerator;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.common.bean.DevelopmentSettings;
+import com.pcs.perpetualRents.dao.IdentityGeneratorDAO;
+
+@Repository
+public class IdentityGeneratorDAOImpl implements IdentityGeneratorDAO {
+	
+	private static Logger logger = ApplicationSettings.getLogger(IdentityGeneratorDAOImpl.class.getName()); 
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	@Autowired
+	private DevelopmentSettings developmentSettings;
+
+	@Override
+	public String getUniqueReference(String objective) {
+		
+		String sql = "SELECT ua." + IdentityGenerator.START + ", ua." + IdentityGenerator.END + ", ua." + IdentityGenerator.LENGTH + ", ua." + IdentityGenerator.OBJECTIVE
+			 	+ ", ua." + IdentityGenerator.PREFIX + ", ua." + IdentityGenerator.IDENTITY_NUMBER + " FROM " + IdentityGenerator.TABLE_NAME + " ua WHERE ua." + IdentityGenerator.OBJECTIVE 
+			 	+ " = '" + objective + "' ";
+		
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+		
+		List<IdentityGenerator> referenceList = jdbcTemplate.query(sql, new RowMapper<IdentityGenerator>() {
+			@Override
+			public IdentityGenerator mapRow(ResultSet rst, int arg1) throws SQLException {
+				IdentityGenerator obj = new IdentityGenerator();
+					obj.setObjective(rst.getString(IdentityGenerator.OBJECTIVE));
+					obj.setStart(rst.getLong(IdentityGenerator.START));
+					obj.setEnd(rst.getLong(IdentityGenerator.END));
+					obj.setLength(rst.getInt(IdentityGenerator.LENGTH));
+					obj.setPrefix(rst.getString(IdentityGenerator.PREFIX));
+					obj.setIdentityNumber(rst.getString(IdentityGenerator.IDENTITY_NUMBER));
+				return obj;
+			}
+		});
+		
+		if(referenceList != null && !referenceList.isEmpty()){
+			IdentityGenerator genObj = referenceList.get(0);
+			if(genObj != null){
+				IdentityGenerator referenceObj = new IdentityGenerator(genObj);
+					referenceObj.setIdentityNumber(referenceObj.getNewIdentity());
+					referenceObj.setReference(referenceObj.getNewIdentity());
+					
+					boolean status = updateReference(referenceObj);
+					if(status)
+						return referenceObj.getReference();
+			}
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public boolean updateReference(final IdentityGenerator obj){
+		try {
+			String sql = " UPDATE " + IdentityGenerator.TABLE_NAME + " SET " +
+					IdentityGenerator.IDENTITY_NUMBER + " = ?  WHERE " + IdentityGenerator.OBJECTIVE + " =? ";
+		
+				if(developmentSettings.isShowSQL())
+					logger.info(sql);
+			
+			jdbcTemplate.update(sql, new PreparedStatementSetter() {
+				@Override
+				public void setValues(PreparedStatement psObj) throws SQLException {
+					psObj.setString(1 , obj.getIdentityNumber());
+					psObj.setString(2 , obj.getObjective());
+				}
+			});
+				return true;
+		} catch(Exception e) {
+			if (developmentSettings.isShowStackTrace())
+				e.printStackTrace();
+				return false;
+		}
+	}
+
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	public DevelopmentSettings getDevelopmentSettings() {
+		return developmentSettings;
+	}
+
+	public void setDevelopmentSettings(DevelopmentSettings developmentSettings) {
+		this.developmentSettings = developmentSettings;
+	}
+	
+}

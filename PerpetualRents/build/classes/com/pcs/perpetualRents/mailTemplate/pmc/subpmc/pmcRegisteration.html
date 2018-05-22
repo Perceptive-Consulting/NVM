@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+    
+         <!-- Dear {PMC/Super admin first and second name}, the {Super admin first and second name} of {Charity name} 
+         has registered user {user first and second name} {Business Title} who’s areas consist of {selected  } 
+         and their access is limited to {user, admin, super admin, read only} -->
+		
+		 Dear <span th:text="${pmcName}"></span>, the <span th:text="${createdBy}"></span> of <span th:text="${pmcName}"></span>
+		 has registered user <span th:text="${contactName}"></span>
+		 who's areas consist of <span th:text="${cities}"></span> and their access is limited. 
+		 
+		  <p>You can do login with:</p>
+		 
+			 <p>UserName :   <span th:text="${username}"></span></p>
+			 <p>Password :   <span th:text="${password}"></span></p>
+		 
+		 <p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		 <p>&nbsp;</p>
+			     
+    </body>
+
+</html>

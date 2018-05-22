@@ -1,0 +1,65 @@
+package com.pcs.perpetualRents.util;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+
+public class ApplicationHandelerInterceptor implements HandlerInterceptor {
+
+	@Autowired
+	private ApplicationSettings applicationSettings;
+	
+	@Override
+	public void afterCompletion(HttpServletRequest request,HttpServletResponse response, Object arg2, Exception arg3) throws Exception {
+		clearCache(response);
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response,Object arg2, ModelAndView arg3) throws Exception {
+		clearCache(response);
+	}
+
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,Object handler) throws Exception {
+		clearCache(response);
+		Cookie cookie = new Cookie("maxage",String.valueOf(applicationSettings.getSessionMaxAge()*60*1000));
+		response.addCookie(cookie);
+		String uploadPath = request.getServletContext().getRealPath(applicationSettings.getFolderName());
+		request.getSession().setAttribute("contextPath", request.getContextPath());
+		applicationSettings.setFolderPath(uploadPath);
+		applicationSettings.setContextPath(request.getContextPath());
+		
+		request.setAttribute("contextPath", request.getContextPath());
+		String wordPressUrl = request.getServletContext().getInitParameter("wordPressUrl");
+		if(wordPressUrl != null && wordPressUrl.length() > 0){
+			applicationSettings.setWordPressUrl(wordPressUrl);
+		}
+		request.setAttribute("wordPressUrl", applicationSettings.getWordPressUrl());
+		
+		return true;
+	}
+	private void clearCache(HttpServletResponse response){
+		response.addHeader("Pragma", "no-cache");
+	    response.addHeader("Cache-Control", "no-cache");
+	    response.addHeader("Cache-Control", "no-store");
+	    response.addHeader("Cache-Control", "must-revalidate");
+	    response.addHeader("Content-Type", "charset=UTF-8");
+	    
+	}
+
+	public ApplicationSettings getApplicationSettings() {
+		return applicationSettings;
+	}
+
+	public void setApplicationSettings(ApplicationSettings applicationSettings) {
+		this.applicationSettings = applicationSettings;
+	}
+	
+}

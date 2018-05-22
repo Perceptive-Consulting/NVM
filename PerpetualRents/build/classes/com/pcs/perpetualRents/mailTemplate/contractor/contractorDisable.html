@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        
+            
+        <p>Hi <span th:text="${receiverName}"></span>,</p>
+
+		<p>You have been locked for some reason.Please contact on </p>
+		
+		<p>EmailId : <span th:text="${perpetualEmailId}"></span></p>
+		
+		<p>Phone Number : <span th:text="${phoneNumber}"></span></p>
+		
+		<p>&nbsp;</p>
+
+		<p>Thanks</p>
+
+		<p><span th:text="${senderName}">Perpetual</span></p>
+					
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+		
+		
+		
+		<http pattern="/resource/**" security="none"/>	
+		<http pattern="/uploadesFiles/**" security="none"/>	
+			
+		<http use-expressions="true" auto-config="true">
+		
+		<intercept-url pattern="/login.htm" access="permitAll" />
+	
+		<intercept-url pattern="/home.htm" access="permitAll" />
+		<intercept-url pattern="/register.htm" access="permitAll" />
+		<intercept-url pattern="/charity.htm" access="isAuthenticated()" />
+		<intercept-url pattern="/contractor.htm" access="isAuthenticated()" />
+		<intercept-url pattern="/landlord.htm" access="isAuthenticated()" />
+		<intercept-url pattern="/property.htm" access="isAuthenticated()" />
+		<intercept-url pattern="/download.htm" access="isAuthenticated()" />
+		<intercept-url pattern="/view.htm" access="isAuthenticated()" />
+		<intercept-url pattern="/conversation.htm" access="isAuthenticated()" />
+		<intercept-url pattern="/propertyDeveloper.htm" access="isAuthenticated()" />
+		
+		<!-- DEVELOPMENT -->
+		
+	  	<form-login login-page="/login.htm" default-target-url="/home.htm" always-use-default-target="true" authentication-failure-url="/login.htm" />
+		<logout invalidate-session="true" logout-success-url="/login.htm" />
+		
+		
+		<!-- GTS -->
+		<!--
+ 	    <form-login login-page="/login.htm" default-target-url="/home.htm" always-use-default-target="true" authentication-failure-url="http://54.191.172.136:82/thenovoidsman/error-page/" /> 
+ 		<logout invalidate-session="true" logout-success-url="http://54.191.172.136:82/thenovoidsman/" />
+ 		-->
+ 		  
+	</http>
+	
+	
+	<authentication-manager>
+		<authentication-provider>
+			<jdbc-user-service data-source-ref="dataSource" />
+		</authentication-provider>
+	</authentication-manager>
+
+</beans:beans>

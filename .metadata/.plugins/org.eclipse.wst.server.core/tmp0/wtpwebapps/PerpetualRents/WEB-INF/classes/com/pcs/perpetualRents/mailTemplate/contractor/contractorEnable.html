@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        
+            
+        <p>Hi <span th:text="${receiverName}"></span>,</p>
+
+		<p>Your status have been changed to ENABLED. Now You can do login by following credentials:</p>
+		
+		<p>UserName : <span th:text="${userName}"></span></p>
+		
+		<p>Password : <span th:text="${password}"></span></p>
+		
+		<p>&nbsp;</p>
+
+		<p>Thanks</p>
+
+		<p><span th:text="${senderName}">Perpetual</span></p>
+					
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

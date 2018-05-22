@@ -1,0 +1,409 @@
+package com.pcs.perpetualRents.web.controller;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pcs.perpetualRents.business.bean.Charity;
+import com.pcs.perpetualRents.business.bean.Contractor;
+import com.pcs.perpetualRents.business.bean.Conversation;
+import com.pcs.perpetualRents.business.bean.LandLord;
+import com.pcs.perpetualRents.business.bean.Mail;
+import com.pcs.perpetualRents.business.bean.Property;
+import com.pcs.perpetualRents.business.bean.PropertyDeveloper;
+import com.pcs.perpetualRents.business.bean.UserLogin;
+import com.pcs.perpetualRents.enm.ContractorFunctionality;
+import com.pcs.perpetualRents.enm.MailEventActor;
+import com.pcs.perpetualRents.enm.ObjectType;
+import com.pcs.perpetualRents.enm.PropertyType;
+import com.pcs.perpetualRents.enm.UserType;
+import com.pcs.perpetualRents.enm.WebAction;
+import com.pcs.perpetualRents.manager.ContractorManager;
+import com.pcs.perpetualRents.manager.ConversationManager;
+import com.pcs.perpetualRents.manager.LandLordManager;
+import com.pcs.perpetualRents.manager.MailManager;
+import com.pcs.perpetualRents.manager.PMCManager;
+import com.pcs.perpetualRents.manager.PropertyDeveloperManager;
+import com.pcs.perpetualRents.manager.PropertyManager;
+import com.pcs.perpetualRents.web.delegates.AjaxJSONDelegate;
+
+@Controller
+public class ConversationController{
+
+	@Autowired
+	private PropertyManager propertyManager;
+	@Autowired
+	private AjaxJSONDelegate JSONDelegate;
+	@Autowired
+	private ConversationManager conversationManager;
+	@Autowired
+	private ContractorManager contractorManager;
+	@Autowired
+	private LandLordManager landLordManager;
+	@Autowired
+	private MailManager mailManager;
+	@Autowired
+	private PMCManager pmcManager;
+	@Autowired
+	private PropertyDeveloperManager propertyDeveloperManager;
+	/*@Autowired
+	private ConversationDAO conversationDAO;
+	@Autowired
+	private AssignManager assignManager;*/
+	
+	private UserLogin loginObj;
+	private HttpSession sessionObj;
+	
+	ObjectMapper mapper = new ObjectMapper();
+	
+	@RequestMapping("/conversation")
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		 JSONObject jObj = new JSONObject();
+		 JSONArray jArray = new JSONArray();
+		
+		sessionObj =  request.getSession(false);
+		//UserLogin loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		String action1 = request.getParameter("action");
+		String param = request.getParameter("param");
+		//String task = request.getParameter("task");
+		
+		WebAction action = WebAction.get(action1);
+		switch (action) {
+		
+			case ADD:
+				
+
+			case LIST:
+				if("LANDLORD-PROPERTY-CONVERSATION".equalsIgnoreCase(param)){
+					String propId = request.getParameter("propertyId");
+					Long propertyId = null;
+					if(propId != null){
+						propertyId = Long.valueOf(propId.trim());
+						sessionObj.setAttribute("propertyId", propertyId);
+					}else{
+						propertyId = (Long) sessionObj.getAttribute("propertyId");
+					}
+					if(propertyId != null){
+						List<Conversation> convList = conversationManager.loadConversationByPropertyId(propertyId, PropertyType.CURRENT_DEVELOPMENT.id());
+						if(convList != null && !convList.isEmpty()){
+							for (Conversation conversationObj : convList) {
+								Contractor conObj = contractorManager.loadContractorById(conversationObj.getActorTwoId());
+								JSONObject _jObj = new JSONObject();
+								if(conObj != null)
+									_jObj.put("contractor", conObj.toJSON(true));
+								
+								_jObj.put("conversation", conversationObj.toJSON(true));
+								
+								jArray.put(_jObj);
+							}
+							jObj.put("success", true);
+							jObj.put("data", jArray);
+						}else{
+							jObj.put("success", false);
+						}
+					}
+				}else if("PMC-CONVERSATION-BY-PROPERTYID".equalsIgnoreCase(param)){}				
+					JSONDelegate.setResponse(jObj, response);
+				break;
+		}
+		return null;
+	}
+	
+	@RequestMapping("conversation/loadPMCConversationByProperty")
+	public void loadPMCConversationByProperty(HttpServletRequest request, HttpServletResponse response) throws NumberFormatException, Exception{
+		JSONObject jObj = new JSONObject();
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		String propId = request.getParameter("propertyId");
+		String propertyTypeIdStr = request.getParameter("propertyTypeId");
+		Integer propertyTypeId = null;
+		if(propertyTypeIdStr != null && Integer.parseInt(propertyTypeIdStr) == PropertyType.PROPOSED_DEVELOPMENT.id()){
+			propertyTypeId = PropertyType.PROPOSED_DEVELOPMENT.id();
+		}else{
+			propertyTypeId = PropertyType.CURRENT_DEVELOPMENT.id();
+		}
+		if(propId != null && loginObj != null){
+			Charity tCharityObj = pmcManager.loadCharityByUserLogin(loginObj);
+			if(propId != null && tCharityObj != null){
+				List<Conversation> conversationList = conversationManager.loadConversationByActorOne(tCharityObj.getId(), loginObj.getObjectType().id(), Long.valueOf(propId), propertyTypeId);
+				if(conversationList != null){
+					Conversation conObj = conversationList.get(0);
+					if(conObj != null){
+						jObj.put("success", true);
+						jObj.put("data", conObj.toJSON(true));
+					}
+				}else{
+					jObj.put("success", false);
+				}
+			}
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("conversation/loadContractorJobsDetails")
+	public void loadContractorJobsDetails(HttpServletRequest request, HttpServletResponse response) throws JSONException{
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		JSONObject jObj = new JSONObject();
+		JSONArray jArray = new JSONArray();
+		if(loginObj != null){
+			Contractor tConObj = contractorManager.getContractorByUserLogin(loginObj);
+			if(tConObj != null){
+			 List<Conversation> tlAllContractorconversation = conversationManager.loadConversationByContractorId(tConObj.getId());
+			 if(tlAllContractorconversation != null && !tlAllContractorconversation.isEmpty()){
+				 Set<Long> landlordSet = new HashSet<Long>();
+				 for (Conversation tJobsObj : tlAllContractorconversation) {
+					 landlordSet.add(tJobsObj.getActorOneId());
+				 }
+				 for (Long landlordId : landlordSet) {
+					 JSONObject landlordJSONObj = new JSONObject();
+					 LandLord tLandlordObj = landLordManager.loadLandlordById(landlordId);
+					 landlordJSONObj.put("landlordName", tLandlordObj.getFirstName());
+					 Set<Long> propertyIdSet = new HashSet<Long>();
+					 List<Conversation> conversationLandlord = conversationManager.loadConversationByActorOneAndActorTwo(landlordId, ObjectType.LANDLORD.id(), tConObj.getId(), ObjectType.CONTRACTOR.id());
+					 if(conversationLandlord != null && !conversationLandlord.isEmpty()){
+						 for (Conversation landLordConversationObj : conversationLandlord) {
+							 propertyIdSet.add(Long.valueOf(landLordConversationObj.getPropertyId()));
+						 }
+						 
+					 }
+					 JSONArray propJSONArr = new JSONArray();
+					 for (Long propertyId : propertyIdSet) {
+						 JSONObject _propObj = new JSONObject();
+						Property propertyObj = propertyManager.loadPropertyById(propertyId);
+						String uniqueReference = propertyObj.getContactPerson() + "-" + propertyObj.getAddressObj().getPostCode();
+							_propObj.put("propertyReference", uniqueReference);
+							List<Conversation> functionalitiesList = conversationManager.loadConversationByActorTwo(tConObj.getId(), ObjectType.CONTRACTOR.id(), propertyId, PropertyType.CURRENT_DEVELOPMENT.id());
+							JSONArray jFunctonalityArr = new JSONArray();
+							if(functionalitiesList != null){
+								JSONObject convJsonObject = null;
+								for (Conversation conversationObj : functionalitiesList) {
+									convJsonObject = new JSONObject();
+									convJsonObject.put("conversation", conversationObj.toJSON(true));
+									jFunctonalityArr.put(convJsonObject);
+								}
+							}
+							_propObj.put("functionality", jFunctonalityArr);
+							
+						 propJSONArr.put(_propObj);
+					 }
+					
+					 landlordJSONObj.put("landlordProperty", propJSONArr);
+					 jArray.put(landlordJSONObj);
+				}
+				 
+				 
+				 
+				 jObj.put("success", true);
+				 jObj.put("data", jArray);
+			 }else{
+				 jObj.put("success", false);
+			 }
+			}else{
+				jObj.put("success", false);
+			}
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("conversation/conversationByFieldName")
+	public void conversationByFieldName(HttpServletRequest request, HttpServletResponse response) throws JSONException{
+		sessionObj = request.getSession(false);
+		String fieldName = request.getParameter("fieldName");
+		JSONObject jObj = new JSONObject();
+		JSONArray jArray = new JSONArray();
+		Long functionalityId = null;
+		if(fieldName != null){
+			ContractorFunctionality conObj =  ContractorFunctionality.getByFieldName(fieldName);
+			functionalityId = conObj.id();
+		}
+		String propId = request.getParameter("propertyId");
+		Long propertyId = null;
+		if(propId != null){
+			propertyId = Long.valueOf(propId.trim());
+			sessionObj.setAttribute("propertyId", propertyId);
+		}else{
+			propertyId = (Long) sessionObj.getAttribute("propertyId");
+		}
+		if(propertyId != null && functionalityId != null){
+			List<Conversation> convList = conversationManager.loadConversationByPropertyAndFunctionality(propertyId, PropertyType.CURRENT_DEVELOPMENT.id(), functionalityId);
+			if(convList != null && !convList.isEmpty()){
+				for (Conversation conversationObj : convList) {
+					Contractor conObj = contractorManager.loadContractorById(conversationObj.getActorTwoId());
+					JSONObject _jObj = new JSONObject();
+					if(conObj != null)
+						_jObj.put("contractor", conObj.toJSON(true));
+					
+					_jObj.put("conversation", conversationObj.toJSON(true));
+					
+					jArray.put(_jObj);
+				}
+				jObj.put("success", true);
+				jObj.put("data", jArray);
+			}else{
+				jObj.put("success", false);
+			}
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("conversation/loadAllMailsByConversation")
+	public void loadAllMailsByConversation(HttpServletRequest request, HttpServletResponse response) throws JSONException{
+		JSONArray jArray = new JSONArray();
+		JSONObject jObj = new JSONObject();
+		String conversationId = request.getParameter("conversationId");
+		if(conversationId != null){
+			List<Mail> mailList = mailManager.loadMailByConversationId(Long.valueOf(conversationId.trim()));
+			if(mailList != null){
+				for (Mail mailObj : mailList) {
+					Conversation conversationObj = conversationManager.loadConversationById(mailObj.getConversationId());
+					if(conversationObj != null){
+						if(mailObj.getMailFrom().trim().equalsIgnoreCase(conversationObj.getMailId1())){
+							ObjectType objType = ObjectType.get(conversationObj.getActorOneObjectTypeId());
+							if(objType.id() == ObjectType.CONTRACTOR.id()){
+								Contractor contractorObj = contractorManager.loadContractorById(conversationObj.getActorOneId());
+								if(contractorObj != null){
+									UserLogin tLoginObj = contractorObj.getLoginObj();
+									if(tLoginObj != null)
+										mailObj.setSenderUserName(tLoginObj.getUsername());
+								}
+							}else if(objType.id() == ObjectType.LANDLORD.id()){
+								LandLord landlordObj = landLordManager.loadLandlordById(conversationObj.getActorOneId());
+								if(landlordObj != null){
+									UserLogin tLoginObj = landlordObj.getLoginObj();
+									if(tLoginObj != null)
+										mailObj.setSenderUserName(tLoginObj.getUsername());
+								}
+							}else if(objType.id() == ObjectType.SUPER_PMC.id() || objType.id() == ObjectType.PMC.id()){
+								Charity charityObj = pmcManager.loadPMCById(conversationObj.getActorOneId());
+								if(charityObj != null){
+									UserLogin tLoginObj = charityObj.getLoginObj();
+									if(tLoginObj != null)
+										mailObj.setSenderUserName(tLoginObj.getUsername());
+								}
+							}
+							
+						}else if(mailObj.getMailFrom().trim().equalsIgnoreCase(conversationObj.getMailId2())){
+							ObjectType objType = ObjectType.get(conversationObj.getActorTwoObjectTypeId());
+							if(objType.id() == ObjectType.CONTRACTOR.id()){
+								Contractor contractorObj = contractorManager.loadContractorById(conversationObj.getActorTwoId());
+								if(contractorObj != null){
+									UserLogin tLoginObj = contractorObj.getLoginObj();
+									if(tLoginObj != null)
+										mailObj.setSenderUserName(tLoginObj.getUsername());
+								}
+							}else if(objType.id() == ObjectType.LANDLORD.id()){
+								LandLord landlordObj = landLordManager.loadLandlordById(conversationObj.getActorTwoId());
+								if(landlordObj != null){
+									UserLogin tLoginObj = landlordObj.getLoginObj();
+									if(tLoginObj != null)
+										mailObj.setSenderUserName(tLoginObj.getUsername());
+								}
+							}else if(objType.id() == ObjectType.SUPER_PMC.id() || objType.id() == ObjectType.PMC.id()){
+								Charity charityObj = pmcManager.loadPMCById(conversationObj.getActorTwoId());
+								if(charityObj != null){
+									UserLogin tLoginObj = charityObj.getLoginObj();
+									if(tLoginObj != null)
+										mailObj.setSenderUserName(tLoginObj.getUsername());
+								}
+							}else if(objType.id() == ObjectType.PROPERTY_DEVELOPER.id()){
+								
+								PropertyDeveloper propertyDeveloperObj = propertyDeveloperManager.loadPropDeveloperById(conversationObj.getActorTwoId());
+								if(propertyDeveloperObj != null){
+									UserLogin tLoginObj = propertyDeveloperObj.getLoginObj();
+									if(tLoginObj != null)
+										mailObj.setSenderUserName(tLoginObj.getUsername());
+								}
+							}
+						}
+					}
+					jArray.put(new JSONObject().put("mail", mailObj.toJSON()));
+				}
+				jObj.put("data", jArray);
+				jObj.put("success", true);
+			}else{
+				jObj.put("data", false);
+			}
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("conversation/mailSendByPMC")
+	public void mailSendByPMC(HttpServletRequest request, HttpServletResponse response) throws JSONException, JsonParseException, JsonMappingException, IOException{
+		Mail mailObj = mapper.readValue(request.getInputStream(), Mail.class);
+		JSONObject jObj = new JSONObject();
+		HttpSession session = request.getSession(false);
+		UserLogin loginObj = (UserLogin) session.getAttribute("loginObj");
+		if(loginObj != null){
+			if(loginObj.getUserTypeId() == UserType.SUPER_PMC.id())
+				mailObj.setMailEventActor((short)MailEventActor.PMC_ADMIN.id());
+			else if(loginObj.getUserTypeId() == UserType.PMC.id())
+				mailObj.setMailEventActor((short)MailEventActor.PMC_USERS.id());
+			
+			boolean execStatus =  mailManager.sendMailByPMC(mailObj);
+			if(execStatus){
+				jObj.put("success", true);
+			}else{
+				jObj.put("success", false);
+			}
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("conversation/mailSendBycontractor")
+	public void mailSendBycontractor(HttpServletRequest request, HttpServletResponse response) throws JSONException, JsonParseException, JsonMappingException, IOException{
+		Mail mailObj = mapper.readValue(request.getInputStream(), Mail.class);
+		JSONObject jObj = new JSONObject();
+		boolean execStatus =  mailManager.sendMailByContractor(mailObj);
+		if(execStatus){
+			jObj.put("success", true);
+		}else{
+			jObj.put("success", false);
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("conversation/mailSendByLandlord")
+	public void mailSendByLandlord(HttpServletRequest request, HttpServletResponse response) throws JsonParseException, JsonMappingException, IOException, JSONException{
+		JSONObject jObj = new JSONObject();
+		Mail mailObj = mapper.readValue(request.getInputStream(), Mail.class);
+		boolean execStatus =  mailManager.sendMailByLandlord(mailObj);
+		if(execStatus){
+			jObj.put("success", true);
+		}else{
+			jObj.put("success", false);
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("conversation/mailSendByPropertyDeveloper")
+	public void mailSendByPropertyDeveloper(HttpServletRequest request, HttpServletResponse response) throws JsonParseException, JsonMappingException, IOException, JSONException{
+		JSONObject jObj = new JSONObject();
+		Mail mailObj = mapper.readValue(request.getInputStream(), Mail.class);
+		boolean execStatus =  mailManager.sendMailByPropertyDeveloper(mailObj);
+		if(execStatus){
+			jObj.put("success", true);
+		}else{
+			jObj.put("success", false);
+		}
+		JSONDelegate.setResponse(jObj, response);
+	}
+
+}

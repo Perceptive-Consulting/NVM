@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+            
+        <p>Dear Admin <span th:text="${receiverName}"></span>The Landlord <span th:text="${landlordName}"></span> of <span th:text="${postCode}"></span> has just registered a new property,</p>
+
+		<p>please ensure that the landlord is the owner of the property or has the power of attorney to represent the property owner, in such a case two documents will be needed, a signed ‘POA’</p>
+			
+		<p> and a copy of the ‘Title deeds’ that should be current and has been downloaded and both should then be uploaded to the website. </p>
+		
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

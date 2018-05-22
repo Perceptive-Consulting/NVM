@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="1959" key="DifferencesDialog.location.x"/>
+	<item value="2" key="ResourceSelectionTree.mode"/>
+	<item value="200" key="HistoryDialog.weights.2"/>
+	<item value="69" key="HistoryDialog.weights.1"/>
+	<item value="8" key="UpdateDialogWithConflictHandling.location.y"/>
+	<item value="581" key="HistoryDialog.weights.0"/>
+	<item value="88" key="HistoryTableProvider.HistoryDialog.Date"/>
+	<item value="70" key="HistoryTableProvider.HistoryDialog.Author"/>
+	<item value="358" key="HistoryTableProvider.SVNHistoryPage.Date"/>
+	<item value="392" key="DifferencesDialog.size.y"/>
+	<item value="714" key="HistoryTableProvider.SVNHistoryPage.Comment"/>
+	<item value="1096" key="DifferencesDialog.size.x"/>
+	<item value="143" key="HistoryTableProvider.SVNHistoryPage.Revision"/>
+	<item value="264" key="DifferencesDialog.location.y"/>
+	<item value="500" key="CommitDialog.weights.0"/>
+	<item value="500" key="CommitDialog.weights.1"/>
+	<item value="285" key="HistoryTableProvider.SVNHistoryPage.Author"/>
+	<item value="174" key="HistoryTableProvider.HistoryDialog.Comment"/>
+	<item value="810" key="HistoryDialog.size.x"/>
+	<item value="400" key="HistoryDialog.size.y"/>
+	<item value="0" key="CommitDialog.location.y"/>
+	<item value="35" key="HistoryTableProvider.HistoryDialog.Revision"/>
+	<item value="776" key="UpdateDialogWithConflictHandling.size.y"/>
+	<item value="1493" key="CommitDialog.location.x"/>
+	<item value="525" key="UpdateDialogWithConflictHandling.size.x"/>
+	<item value="1666" key="CommitDialog.size.x"/>
+	<item value="1050" key="CommitDialog.size.y"/>
+	<item value="2064" key="UpdateDialogWithConflictHandling.location.x"/>
+	<item value="130" key="HistoryDialog.location.y"/>
+	<item value="2126" key="HistoryDialog.location.x"/>
+	<section name="CommitWizard">
+		<item value="false" key="ShowCompare"/>
+		<item value="500" key="VWeight2"/>
+		<item value="500" key="VWeight1"/>
+	</section>
+	<section name="SynchronizeResourceSelectionDialog">
+		<item value="" key="SynchronizeResourceSelectionDialog.STORE_WORKING_SETS"/>
+	</section>
+</section>

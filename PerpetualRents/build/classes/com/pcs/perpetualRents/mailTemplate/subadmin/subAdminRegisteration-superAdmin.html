@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+    
+    
+        <!-- Dear {Super admin first and second name}, you have successful created a new admin with privileges 
+        that allow this person to be {user, admin, super admin, read only} -->
+	    
+	    Dear <span th:text="${adminName}"></span>, you have successful created a new admin with privileges 
+        that allow this person to be <strong>ADMIN</strong>.
+		
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

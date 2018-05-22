@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        
+        <!-- Dear {admin first and second name}, the {Super admin first and second name} of {Charity name} has updated user details 
+        {user first and second name} {Business Title} who’s areas consist of {selected areas} who’s access may have been changed 
+        to {user, admin, super admin, read only}.  --> 
+            
+        Dear <span th:text="${admin}"></span>, the <span th:text="${createdBy}"></span> of <span th:text="${pmcName}"></span>  has updated user details 
+        <span th:text="${contactName}"></span> who’s areas consist of <span th:text="${cities}"></span> who’s access may have been changed. 
+       
+
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+					
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

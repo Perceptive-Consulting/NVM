@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        
+             
+         Dear <span th:text="${adminName}"></span>, this is to notify you that the <span th:text="${landLordName}"></span> 
+         has updated their details but please ensure you check what has been updated.
+
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+					
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

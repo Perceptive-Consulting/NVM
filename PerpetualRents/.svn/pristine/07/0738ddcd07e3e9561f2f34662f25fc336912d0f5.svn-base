@@ -1,0 +1,1148 @@
+
+	
+	
+INSERT INTO tbl_perpetualRents_questiongroup(groupName, criteriaStr, groupDetail, failThreshold) VALUES
+('HMOLicenceQuestionID','HMOLicense','HMO License',5),
+('certificationGroupID','HMOLicense','Certification',5),
+('ManualID','Manuals','Manuals',5),
+('ReadTerms','Free from ALL Category 1 Hazards as set out In the Governments Housing Health and Safety Rating System (HHSRS)','none',5),
+('IsThePropertyGroupID','Free from ALL Category 1 Hazards as set out In the Governments Housing Health and Safety Rating System (HHSRS)','Is the Property: ',5),
+('DoesThePropertyHaveGroupID','Free from ALL Category 1 Hazards as set out In the Governments Housing Health and Safety Rating System (HHSRS)','Does the property have',5),
+('PropertyFreeFromGroupID','Free from ALL Category 1 Hazards as set out In the Governments Housing Health and Safety Rating System (HHSRS)',' Is the property free from',5),
+('propertyStandardGroupID','PropertyStandards','Property Standards',5),
+('CriteriaB-Group-1','Criteria B. It must be in a reasonable state of repair ','Does the property have',5),
+('PropertyHaveGroup-CR-C-ID','Criteria C - It must have reasonably modern facilities and services','Does the property have ',5),
+('PropertyHaveGroup-CR-D-ID1','Criteria D - It must provide a reasonable degree of thermal comfort','Does the property have',5);
+
+	
+INSERT INTO tbl_perpetualRents_propertyquestions(groupId, fieldName, question, documentSupported, affirmativeAns, considerable)
+VALUES 
+(1,'hmoLicence','The property is not a licensable HMO (please delete as appropriate)NB: A licensable HMO is a property that is three or more stories high and has
+ Five or more people living in, it in more than one household and sharing amenities such as bathrooms, toilets and cooking facilities',0,1,1),
+(1,'licenceNumber','license number for the property',0,1,0),
+
+(2,'electricalInstallation','A satisfactory periodic inspection report for the fixed electrical installation in the property from a recognised inspection body',0,1,1),
+(2,'electricalTest','A satisfactory Electrical Test Certificate, obtained in the last five years for the fire alarm system (HMO / Bedsit only) from a recognised inspection body (i.e. NICEIC, ECA etc.)',0,1,1),
+(2,'gasCertificate','A satisfactory gas safety certificate- a new one will be required every year. And will be paid for by the landlord.',0,1,1),
+(2,'energyPerformance','A satisfactory Energy Performance Certificate (EPC band A - High D all other bands will need to be updated by 2018 or your property may be deemed as been uninhabitable thus been in breach of contract) for more information see website for details ',0,1,1),
+(2,'centralHeatingSystem','A satisfactory service contract for the central heating system (optional).',0,1,1),
+(2,'buildingInsaurance','A satisfactory Insurance Certificate / policy document for your building insurance (needed).',0,1,1),
+(2,'asbestosSurvey','Asbestos survey and any removal works',0,1,1),
+(2,'periodicInspectionOfWaterSupply','Periodic inspection of the water system, for example Legionella and any remedial works required to maintain a safe water supply',0,1,1),
+(2,'keySet','We need two set of key as the Charity or Charities will retain a set and so will Ashantidutch Property Letting,
+ At the end of the scheme both sets of keys will be returned',0,1,1),
+ (2,'landTitleRegisteryDocument','Please upload a copy of your land title registry document. The cost to property owners in 2014 was �3.00 you should have a copy or your solicitor should have a copy as part of the purchase process.',0,1,0),
+ 
+ (2,'inventoryForProperty','Inventory for the property.',0,1,0),
+ (2,'landlordInsauranceForContent','Landlords insurance for content.',0,1,0),
+ 
+ (3,'windowAndDoorWarrantee','A Warrantee for the windows and doors.',0,1,0),
+ (3,'dampPoofcourse','The Damp poof course.',0,1,0),
+ (3,'fittedHobAndOven','Fitted Hob and oven to the Kitchen',0,1,0),
+ (3,'electricShower','Electric shower',0,1,0),
+ (3,'electricFires','Electric Fires',0,1,0),
+
+(3,'manualForCentralHeating','The central heating ?',0,1,0),
+(3,'timerForCentralHeating','Wall fixed timer for the central heating ?',0,1,0),
+(3,'manualForBoiler','Service manual for the boiler ?',0,1,0),
+(3,'manualForFittedOven','Service manual for fitted hob or oven ?',0,1,0), 
+
+ 
+ 
+(4,'readAndUnderstandTerms','Local authorities are under a duty to take action in the case of category 1 hazards.
+ If necessary (or if the owner/manager or tenant requests) the local authority may carry out any necessary remedial work themselves and reclaim the costs.
+ They also have powers to take action in the case of all category 2 hazards (i.e. those which carry lower risks)',0,1,0),
+
+(5,'structurallyStable','Structurally Stable ',0,1,1),
+(5,'freeFromSeriousDisRepair',' Free from Serious Disrepair     ',0,1,1),
+(5,'freeFromDampness','Free from dampness or mould growth ',0,1,1),
+(5,'insulation270mm','Loft insulation of minimum thickness 270mm ',0,1,1),
+(5,'installationDate','When the insulation was laid/installed ?',0,0,0),
+
+(6,'adequateHeating','Adequate heating Please indicate GCH, other',0,1,1),
+(6,'boilerAge','How old the boiler is ?',0,0,0),
+
+(7,'pollutants','Pollutants such as Asbestos, MMF fibres Carbon monoxide (and fuel combustion Products), Biocides, Volatile organic compounds found in paints, radiation & lead?',0,1,1),
+(7,'needRadonRiskReport','Does your property need a Radon risk Report?',0,1,1),
+
+(8,'propertyMeetStandards','Does the property meet all the standards as laid down under section A of the property standards guidance note?',0,1,1),
+(8,'whereITFails',' If not, What areas does it fail on ?',0,1,0),
+(8,'upgradeProperty','Do you intend to upgrade the property to meet our specification and Decent Homes Standards?',0,1,1),
+(8,'workCompletedBy','If yes, when will this work be completed by? Please provide a schedule with task priorities. We can provided a template if needed.',0,1,0),
+
+(9,'adequateSizeandLayout','If applicable, adequate size and layout of common entrance areas for blocks of flats and if your accommodation is other than a flat then tick yes and please put a comment in the box.(e.g. must not have narrow access ways or steep stairs)',0,1,1),
+(9,'safeAgainstUnauthorizedEntry','Is the property safe against unauthorized entry so as to delay and deter intruders and make the occupants feel safer.',0,1,1),
+(9,'careTaker','Is there caretaker/entry phone system to block of flats',0,1,1),
+(9,'burglarAlarmSystem','Is there a burglar alarm systems',0,1,1),
+(9,'allWindowsHaveKeys','If lockable windows have been fitted do all of the windows have keys?',0,1,1),
+(9,'adequateLightening','Adequate lighting (natural and artificial)',0,1,1),
+(9,'adequateSecurityLightening','Is there adequate Security lighting and is it in working condition',0,1,1),
+(9,'externalLighteningAtNight','Is the property protected from intrusive artificial external lighting at night',0,1,1),
+(9,'complaintsAgainstNoise','Has there been complaints by your tenant or the neighbours in regard to excessive noise levels, Traffic/other external noise also considered',0,1,1),
+(9,'safeBarriersAgainstFire','Safe barriers against fires, flames and hot objects, (fire doors etc.) with means of escape',0,1,1),
+(9,'adequateNoiceInsulation','Is there adequate noise insulation as overlap of domestic noise between one dwelling and another (e.g. toilet flushing/television/conversation etc.)',0,1,1),
+
+(10,'kitchen','The Kitchen floor should be reasonably smooth and impervious for easy cleaning thus maintaining a hygienic condition, joints between sink/drainer/worktop and adjacent wall should be sealed and water tight',0,1,1),
+(10,'adequateKitchenSpace','A kitchen with adequate space and layout (e.g. large enough to fit sink, cupboards, cooker, worktops',0,1,1),
+(10,'appropriatePowerSockets','At least four appropriate power sockets associated with the worktop(s) as well as two for general use.',0,1,1),
+(10,'facilitiesForPreparationOfFood','Satisfactory facilities for preparation and cooking of food with a sink and hot and cold water.',0,1,1),
+(10,'storageOfFood','Adequate provision and facilities for storage/preparation/cooking of food.',0,1,1),
+(10,'suitableVentilationOfKitchen','Adequate and appropriate lighting especially over the facilities; and Suitable ventilation of whole of kitchen area, especially the cooking area',0,1,1),
+(10,'suitableLocatedWashBasin','Suitably located bath or shower and wash-hand-basin all with hot and cold water with suitable active ventilation',0,1,1),
+(10,'drainageOfFoulWater','Effective drainage for foul-waste/surface-water ',0,1,1),
+(10,'appropriatelyLocatedBathroom','An appropriately located bathroom and WC (e.g. it isn�t accessed via a bedroom, located outside, or has no sink and is entered from kitchen)',0,1,1),
+(10,'drinkingWater','Water For drinking/cooking/washing/cleaning/sanitation',0,1,1),
+(10,'refuseStorage','Adequate facilities for refuse storage',0,1,1),
+
+(11,'riskOfFall','The risk of falls has been reduced when getting out of the bath/shower/similar facility, to mitigate falls on the same level, or from one level or room to another',0,1,1),
+(11,'adequateNaturalLightening','There is adequate natural lighting to the top and foot of the stairs',0,1,1),
+(11,'securedStepsAndRamps','That trip steps/thresholds/ramps are secured where the change in level is less than 300mm.',0,1,1),
+(11,'doorsDirection','That doors do not open directly onto stairs or the head of the stairs causing obstruction or increasing the likelihood of a fall.',0,1,1),
+(11,'moreThanOneFlightOfStairs','Do you have more than 1 flight of stairs in the property',0,1,1),
+(11,'buildingRegulation','Do all stairs comply with current building regulations i.e
+Tread dimensions to be between 280mm and 360mm;
+Rise dimensions to be between 100mm-180mm;
+Pitch (angle of stairs) to be less than 42Â°;
+Stairs should be checked for above average steepness or shallowness;
+Consistency/uniformity in dimensions of rise and going within a flight (except for obvious change in direction of stair e.g. use of winders);
+Nosing should not project more than 18mm beyond any riser;
+Treads and nosing should provide appropriate friction (carpet etc., if possible)
+',0,1,1),
+(11,'spaceAccessedViaFlightOfStairs','what space is accessed via the non compliant flight of stairs',0,0,0),
+(11,'buildingRegulationDate','Upto Which date will this work get done ?',0,0,0),
+(11,'electricalWiringStandards','Electrical wiring installation meets the latest requirements of Institution of Electrical Engineers/British Standard (BS 7671)',0,1,1),
+(11,'trappingBodyParts','Have threats of trapping body parts been removed or reduced ?',0,1,1);	
+
+TRUNCATE users;
+TRUNCATE authorities;
+TRUNCATE tbl_perpetualRents_address;
+TRUNCATE tbl_perpetualRents_admin;
+TRUNCATE tbl_perpetualrents_adminuploaddocuments;
+TRUNCATE tbl_perpetualRents_applicationsession;
+TRUNCATE tbl_perpetualRents_assignmodel;
+TRUNCATE tbl_perpetualRents_charity;
+TRUNCATE tbl_perpetualRents_city;
+TRUNCATE tbl_perpetualRents_contactdetails;
+TRUNCATE tbl_perpetualRents_contractor;
+TRUNCATE tbl_perpetualRents_contractorregisterationstep2;
+TRUNCATE tbl_perpetualRents_contractorregisterationstep3;
+TRUNCATE tbl_perpetualRents_contractorregisterationstep4;
+TRUNCATE tbl_perpetualRents_conversation;
+TRUNCATE tbl_perpetualRents_documents;
+TRUNCATE tbl_perpetualrents_lead;
+TRUNCATE tbl_perpetualRents_expertise;
+TRUNCATE tbl_perpetualRents_functionalitycostmatrix;
+TRUNCATE tbl_perpetualRents_file;
+TRUNCATE tbl_perpetualRents_landlord;
+TRUNCATE tbl_perpetualrents_propertydocumentdownloadstatus;
+TRUNCATE tbl_perpetualRents_mail;
+TRUNCATE tbl_perpetualRents_mailattachementfile;
+TRUNCATE tbl_perpetualRents_property;
+TRUNCATE tbl_perpetualRents_propertymarketinginformation;
+TRUNCATE tbl_perpetualRents_propertyresponse;
+TRUNCATE tbl_perpetualrents_turnoverdetails;
+TRUNCATE tbl_perpetualrents_pdproperty;
+TRUNCATE tbl_perpetualrents_propertydeveloper;
+TRUNCATE tbl_perpetualrents_pddocuments;
+
+INSERT INTO users (createdUserId, username, password, userTypeId, enabled ) VALUES (0, 'super', 'admin', 1, 1);
+INSERT INTO authorities(username, authority) VALUES ('super', 'ALL');
+INSERT INTO tbl_perpetualRents_address(createdUserId, addressLine1, addressLine2, city, county, landmark, objectType, objectId, postCode, countryId) VALUES 
+(0, '11 Belgrave Road', 'Opal Drive', 'London', 'London', 'Word Vision UK', 9, 1, 'SW1V 1RB', 1);
+INSERT INTO tbl_perpetualRents_contactdetails(createdUserId, emailId, phoneNumber, landlinePhoneNumber, objectType, objectId)
+VALUES (0, 'sunayana@perceptive-solutions.com', '+44 0123456789', '+440987654321', 9, 1);
+INSERT INTO tbl_perpetualRents_admin (createdUserId, uniqueReference, firstName, lastName, enable, userLoginId)
+VALUES (0, 'PRUKAD00198', 'Super', 'Admin', 1, 1);
+
+INSERT INTO tbl_perpetualRents_maileventconfiguration(mailEventTypeId, mailEventTypeName, mailEventActorId, mailEventActorName, actorTypeId, actorTypeName, documentId, enable)
+VALUES
+(1,'Register',1,'Landlord',1,'Landlord',0,1),
+(1,'Register',1,'Landlord',3,'Admin',0,1),
+(1,'Register',1,'Landlord',4,'SuperAdmin',0,1),
+(1,'Register',2,'Contractor',2,'Contractor',0,1),
+(1,'Register',2,'Contractor',3,'Admin',0,1),
+(1,'Register',2,'Contractor',4,'SuperAdmin',0,1),
+(1,'Register',3,'Admin',3,'Admin',0,1),
+(1,'Register',3,'Admin',4,'SuperAdmin',0,1),
+(1,'Register',5,'Charity-Admin',4,'SuperAdmin',0,1),
+(1,'Register',5,'Charity-Admin',3,'Admin',0,1),
+(1,'Register',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(1,'Register',6,'Charity-User',4,'SuperAdmin',0,1),
+(1,'Register',6,'Charity-User',3,'Admin',0,1),
+(1,'Register',6,'Charity-User',5,'Charity-Admin',0,1),
+(1,'Register',6,'Charity-User',6,'Charity-Users',0,1),
+(1,'Register',7,'Property',1,'Landlord',0,1),
+(1,'Register',7,'Property',3,'Admin',0,1),
+(1,'Register',7,'Property',4,'SuperAdmin',0,1),
+(2,'Profile Edit',1,'Landlord',4,'SuperAdmin',0,1),
+(2,'Profile Edit',1,'Landlord',3,'Admin',0,1),
+(2,'Profile Edit',1,'Landlord',1,'Landlord',0,1),
+(2,'Profile Edit',2,'Contractor',2,'Contractor',0,1),
+(2,'Profile Edit',2,'Contractor',3,'Admin',0,1),
+(2,'Profile Edit',2,'Contractor',4,'SuperAdmin',0,1),
+(2,'Profile Edit',3,'Admin',3,'Admin',0,1),
+(2,'Profile Edit',3,'Admin',4,'SuperAdmin',0,1),
+(2,'Profile Edit',5,'Charity-Admin',4,'SuperAdmin',0,1),
+(2,'Profile Edit',5,'Charity-Admin',3,'Admin',0,1),
+(2,'Profile Edit',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(2,'Profile Edit',6,'Charity-User',4,'SuperAdmin',0,1),
+(2,'Profile Edit',6,'Charity-User',3,'Admin',0,1),
+(2,'Profile Edit',6,'Charity-User',5,'Charity-Admin',0,1),
+(2,'Profile Edit',6,'Charity-User',6,'Charity-Users',0,1),
+(13,'Edit',7,'Property',1,'Landlord',0,1),
+(13,'Edit',7,'Property',3,'Admin',0,1),
+(13,'Edit',7,'Property',4,'SuperAdmin',0,1),
+(13,'Edit',7,'Property',2,'Contractor',0,0),
+(13,'Edit',7,'Property',5,'Charity-Admin',0,1),
+(13,'Edit',7,'Property',6,'Charity-Users',0,1),
+(3,'Change Passwword',1,'Landlord',4,'SuperAdmin',0,0),
+(3,'Change Passwword',1,'Landlord',3,'Admin',0,0),
+(3,'Change Passwword',1,'Landlord',1,'Landlord',0,1),
+(3,'Change Passwword',2,'Contractor',1,'Landlord',0,0),
+(3,'Change Passwword',2,'Contractor',3,'Admin',0,0),
+(3,'Change Passwword',2,'Contractor',4,'SuperAdmin',0,1),
+(3,'Change Passwword',3,'Admin',3,'Admin',0,1),
+(3,'Change Passwword',3,'Admin',4,'SuperAdmin',0,0),
+(3,'Change Passwword',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(3,'Change Passwword',5,'Charity-Admin',3,'Admin',0,0),
+(3,'Change Passwword',5,'Charity-Admin',4,'SuperAdmin',0,0),
+(3,'Change Passwword',6,'Charity-User',5,'Charity-Admin',0,0),
+(3,'Change Passwword',6,'Charity-User',3,'Admin',0,0),
+(3,'Change Passwword',6,'Charity-User',4,'SuperAdmin',0,0),
+(3,'Change Passwword',6,'Charity-User',6,'Charity-Users',0,1),
+(4,'Enable',1,'Landlord',1,'Landlord',0,0),
+(4,'Enable',1,'Landlord',3,'Admin',0,0),
+(4,'Enable',1,'Landlord',4,'SuperAdmin',0,0),
+(4,'Enable',2,'Contractor',1,'Landlord',0,0),
+(4,'Enable',2,'Contractor',3,'Admin',0,0),
+(4,'Enable',2,'Contractor',4,'SuperAdmin',0,0),
+(4,'Enable',3,'Admin',3,'Admin',0,1),
+(4,'Enable',3,'Admin',4,'SuperAdmin',0,1),
+(4,'Enable',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(4,'Enable',5,'Charity-Admin',3,'Admin',0,1),
+(4,'Enable',5,'Charity-Admin',4,'SuperAdmin',0,1),
+(4,'Enable',6,'Charity-Users',5,'Charity-Admin',0,1),
+(4,'Enable',6,'Charity-Users',3,'Admin',0,1),
+(4,'Enable',6,'Charity-Users',4,'SuperAdmin',0,1),
+(4,'Enable',6,'Charity-Users',6,'Charity-Users',0,1),
+(4,'Enable',7,'Property',4,'Super-Admin',0,0),
+(4,'Enable',7,'Property',3,'Admin',0,0),
+(4,'Enable',7,'Property',1,'Landlord',0,0),
+(4,'Enable',7,'Property',2,'Contractor',0,0),
+(5,'Disable',1,'Landlord',1,'Landlord',0,0),
+(5,'Disable',1,'Landlord',3,'Admin',0,0),
+(5,'Disable',1,'Landlord',4,'SuperAdmin',0,0),
+(5,'Disable',2,'Contractor',1,'Landlord',0,1),
+(5,'Disable',2,'Contractor',3,'Admin',0,1),
+(5,'Disable',2,'Contractor',4,'SuperAdmin',0,1),
+(5,'Disable',3,'Admin',3,'Admin',0,1),
+(5,'Disable',3,'Admin',4,'SuperAdmin',0,1),
+(5,'Disable',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(5,'Disable',5,'Charity-Admin',3,'Admin',0,1),
+(5,'Disable',5,'Charity-Admin',4,'Super-Admin',0,1),
+(5,'Disable',7,'Property',4,'SuperAdmin',0,1),
+(5,'Disable',7,'Property',3,'Admin',0,1),
+(5,'Disable',7,'Property',1,'Landlord',0,1),
+(5,'Disable',7,'Property',2,'Contractor',0,1),
+(5,'Disable',6,'Charity-Users',4,'SuperAdmin',0,1),
+(5,'Disable',6,'Charity-Users',3,'Admin',0,1),
+(5,'Disable',6,'Charity-Users',5,'Charity-Admin',0,1),
+(5,'Disable',6,'Charity-Users',6,'Charity-Users',0,1),
+(7,'Approve',2,'Contractor',2,'Contractor',0,1),
+(7,'Approve',2,'Contractor',3,'Admin',0,1),
+(7,'Approve',2,'Contractor',4,'SuperAdmin',0,1),
+(7,'Approve',5,'Charity',5,'Charity',0,0),
+(7,'Approve',5,'Charity',3,'Admin',0,0),
+(7,'Approve',5,'Charity',4,'SuperAdmin',0,0),
+(7,'Approve',7,'Property',1,'Landlord',0,1),
+(7,'Approve',7,'Property',3,'Admin',0,1),
+(7,'Approve',7,'Property',4,'SuperAdmin',0,1),
+(7,'Approve',7,'Property',5,'Charity-Admin',0,1),
+(7,'Approve',7,'Property',6,'Charity-Users',0,1),
+(8,'Disapprove',2,'Contractor',1,'Contractor',0,0),
+(8,'Disapprove',2,'Contractor',3,'Admin',0,0),
+(8,'Disapprove',2,'Contractor',4,'SuperAdmin',0,0),
+(8,'Disapprove',7,'Property',1,'Landlord',0,1),
+(8,'Disapprove',7,'Property',3,'Admin',0,1),
+(8,'Disapprove',7,'Property',4,'SuperAdmin',0,1),
+(10,'Assign',10,'Property',1,'Landlord',0,1),
+(10,'Assign',10,'Property',2,'Contractor',0,1),
+(10,'Assign',10,'Property',3,'Admin',0,1),
+(10,'Assign',10,'Property',4,'SuperAdmin',0,1),
+(15,'Reject',7,'Property',1,'Landlord',0,1),
+(15,'Reject',7,'Property',2,'Contractor',0,1),
+(15,'Reject',7,'Property',3,'Admin',0,1),
+(15,'Reject',7,'Property',4,'SuperAdmin',0,1),
+(14,'Accept',7,'Property',1,'Landlord',0,1),
+(14,'Accept',7,'Property',2,'Contractor',0,1),
+(14,'Accept',7,'Property',3,'Admin',0,1),
+(14,'Accept',7,'Property',4,'SuperAdmin',0,1),
+(12,'Password reset',2,'Contractor',2,'Contractor',0,1),
+(12,'Password reset',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(12,'Password reset',5,'Charity-Users',6,'Charity-Users',0,1),
+(12,'Password reset',5,'Admin',3,'Admin',0,1),
+(9,'BAR-STATUS',7,'Property',1,'Landlord',0,1),
+(9,'BAR-STATUS',7,'Property',3,'Admin',0,1),
+(9,'BAR-STATUS',7,'Property',5,'Charity-Admin',0,1),
+(9,'BAR-STATUS',7,'Property',6,'Charity-Users',0,1),
+
+(18,'ADD-CITY',5,'Charity-Admin',4,'SuperAdmin',0,1),
+(18,'ADD-CITY',5,'Charity-Admin',3,'Admin',0,1),
+(18,'ADD-CITY',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(18,'ADD-CITY',6,'Charity-User',4,'SuperAdmin',0,0),
+(18,'ADD-CITY',6,'Charity-User',3,'Admin',0,0),
+(18,'ADD-CITY',6,'Charity-User',5,'Charity-Admin',0,1),
+(18,'ADD-CITY',6,'Charity-User',6,'Charity-Users',0,1),
+
+(19,'EDIT-CITY',5,'Charity-Admin',4,'SuperAdmin',0,1),
+(19,'EDIT-CITY',5,'Charity-Admin',3,'Admin',0,1),
+(19,'EDIT-CITY',5,'Charity-Admin',5,'Charity-Admin',0,1),
+(19,'EDIT-CITY',6,'Charity-User',4,'SuperAdmin',0,0),
+(19,'EDIT-CITY',6,'Charity-User',3,'Admin',0,0),
+(19,'EDIT-CITY',6,'Charity-User',5,'Charity-Admin',0,1),
+(19,'EDIT-CITY',6,'Charity-User',6,'Charity-Users',0,1);
+
+	
+responseObj = responseMap.get("hmoLicence");
+			questionObj = questionMap.get("hmoLicence");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("propertyMeetStandards");
+			questionObj = questionMap.get("propertyMeetStandards");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("upgradeProperty");
+			questionObj = questionMap.get("upgradeProperty");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+			responseObj = responseMap.get("electricalInstallation");
+			questionObj = questionMap.get("electricalInstallation");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("electricalTest");
+			questionObj = questionMap.get("electricalTest");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("gasCertificate");
+			questionObj = questionMap.get("gasCertificate");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("energyPerformance");
+			questionObj = questionMap.get("energyPerformance");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("centralHeatingSystem");
+			questionObj = questionMap.get("centralHeatingSystem");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("buildingInsaurance");
+			questionObj = questionMap.get("buildingInsaurance");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("asbestosSurvey");
+			questionObj = questionMap.get("asbestosSurvey");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+			
+			responseObj = responseMap.get("periodicInspectionOfWaterSupply");
+			questionObj = questionMap.get("periodicInspectionOfWaterSupply");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+			
+			responseObj = responseMap.get("keySet");
+			questionObj = questionMap.get("keySet");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+			// ==============
+			responseObj = responseMap.get("structurallyStable");
+			questionObj = questionMap.get("structurallyStable");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("freeFromSeriousDisRepair");
+			questionObj = questionMap.get("freeFromSeriousDisRepair");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("freeFromDampness");
+			questionObj = questionMap.get("freeFromDampness");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("secureFromRisk");
+			questionObj = questionMap.get("secureFromRisk");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("safeFromRiskOfFire");
+			questionObj = questionMap.get("safeFromRiskOfFire");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("adequateSpace");
+			questionObj = questionMap.get("adequateSpace");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+			// ----------
+			responseObj = responseMap.get("adequateLighting");
+			questionObj = questionMap.get("adequateLighting");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("noiseInsulation");
+			questionObj = questionMap.get("noiseInsulation");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("facilityForRefuseStorage");
+			questionObj = questionMap.get("facilityForRefuseStorage");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("adequateHeating");
+			questionObj = questionMap.get("adequateHeating");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("adequateVentilation");
+			questionObj = questionMap.get("adequateVentilation");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("adequateDrinkingWater");
+			questionObj = questionMap.get("adequateDrinkingWater");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("effectiveDrainage");
+			questionObj = questionMap.get("effectiveDrainage");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("suitablyLocatedWC");
+			questionObj = questionMap.get("suitablyLocatedWC");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("suitablyLocatedBath");
+			questionObj = questionMap.get("suitablyLocatedBath");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("satisfactoryFacilitiesForCookingFood");
+			questionObj = questionMap.get("satisfactoryFacilitiesForCookingFood");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("safetyBarriers");
+			questionObj = questionMap.get("safetyBarriers");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			// --------- No ---------------
+
+			responseObj = responseMap.get("unreasonableRiskOfFalls");
+			questionObj = questionMap.get("unreasonableRiskOfFalls");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("electricalHazards");
+			questionObj = questionMap.get("electricalHazards");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("riskFromExplosion");
+			questionObj = questionMap.get("riskFromExplosion");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("riskOfEntrapment");
+			questionObj = questionMap.get("riskOfEntrapment");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("pollutants");
+			questionObj = questionMap.get("pollutants");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			// Last Page
+
+			responseObj = responseMap.get("programmableCentralHeating");
+			questionObj = questionMap.get("programmableCentralHeating");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("electricStorageHeaters");
+			questionObj = questionMap.get("electricStorageHeaters");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("fuelCentralHeating");
+			questionObj = questionMap.get("fuelCentralHeating");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("warmAirSystem");
+			questionObj = questionMap.get("warmAirSystem");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("underFloorSystem");
+			questionObj = questionMap.get("underFloorSystem");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("efficientHeatingSystem");
+			questionObj = questionMap.get("efficientHeatingSystem");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("centralHeating");
+			questionObj = questionMap.get("centralHeating");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj
+						.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				}
+			}
+
+			responseObj = responseMap.get("cavityWallInsulation50mm");
+			questionObj = questionMap.get("cavityWallInsulation50mm");
+			if (responseObj != null && questionObj != null) {
+				String affirmativeAns = Boolean.toString(questionObj.isAffirmativeAns());
+				String responseStr = responseObj.getResponse();
+				if (responseStr != null) {
+					if (responseStr.equalsIgnoreCase(affirmativeAns))
+						status = status + increment;
+				} else {
+					responseObj = responseMap.get("cavityWallInsulation200mm");
+					questionObj = questionMap.get("cavityWallInsulation200mm");
+					if (responseObj != null && questionObj != null) {
+						String affirmativeAns1 = Boolean.toString(questionObj.isAffirmativeAns());
+						String responseStr1 = responseObj.getResponse();
+						if (responseStr1 != null) {
+							if (responseStr1.equalsIgnoreCase(affirmativeAns1))
+								status = status + increment;
+						}
+					}
+				}
+			}
+			
+			
+			INSERT INTO tbl_perpetualrents_perpetualcity (city) VALUES 
+('Adur'),
+('Allerdale'),
+('Amber Valley'),
+('Arun'),
+('Ashfield'),
+('Ashford'),
+('Aylesbury Vale'),
+('Babergh'),
+('Barking and Dagenham'),
+('Barnet'),
+('Barnsley'),
+('Barrow-in-Furness'),
+('Basildon'),
+('Basingstoke and Deane'),
+('Bassetlaw'),
+('Bath and North East Somerset'),
+('Bedford'),
+('Bexley'),
+('Birmingham'),
+('Blaby'),
+('Blackburn with Darwen'),
+('Blackpool'),
+('Bolsover'),
+('Bolton'),
+('Boston'),
+('Bournemouth'),
+('Bracknell Forest'),
+('Bradford'),
+('Braintree'),
+('Breckland'),
+('Brent'),
+('Brentwood'),
+('Brighton and Hove'),
+('Bristol'),
+('Broadland'),
+('Bromley'),
+('Bromsgrove'),
+('Broxbourne'),
+('Broxtowe'),
+('Burnley'),
+('Bury'),
+('Calderdale'),
+('Cambridge'),
+('Camden'),
+('Cannock Chase'),
+('Canterbury'),
+('Carlisle'),
+('Castle Point'),
+('Central Bedfordshire'),
+('Charnwood'),
+('Chelmsford'),
+('Cheltenham'),
+('Cherwell'),
+('Cheshire East'),
+('Cheshire West and Chester'),
+('Chesterfield'),
+('Chichester'),
+('Chiltern'),
+('Chorley'),
+('Christchurch'),
+('City of London'),
+('Colchester'),
+('Copeland'),
+('Corby'),
+('Cornwall'),
+('Cotswold'),
+('Coventry'),
+('Craven'),
+('Crawley'),
+('Croydon'),
+('Dacorum'),
+('Darlington'),
+('Dartford'),
+('Daventry'),
+('Derby'),
+('Derbyshire Dales'),
+('Doncaster'),
+('Dover'),
+('Dudley'),
+('Durham'),
+('Ealing'),
+('East Cambridgeshire'),
+('East Devon'),
+('East Dorset'),
+('East Hampshire'),
+('East Hertfordshire'),
+('East Lindsey'),
+('East Northamptonshire'),
+('East Riding of Yorkshire'),
+('East Staffordshire'),
+('Eastbourne'),
+('Eastleigh'),
+('Eden'),
+('Elmbridge'),
+('Enfield'),
+('Epping Forest'),
+('Epsom and Ewell'),
+('Erewash'),
+('Exeter'),
+('Fareham'),
+('Fenland'),
+('Forest Heath'),
+('Forest of Dean'),
+('Fylde'),
+('Gateshead'),
+('Gedling'),
+('Gloucester'),
+('Gosport'),
+('Gravesham'),
+('Great Yarmouth'),
+('Greenwich'),
+('Guildford'),
+('Hackney'),
+('Halton'),
+('Hambleton'),
+('Hammersmith and Fulham'),
+('Harborough'),
+('Haringey'),
+('Harlow'),
+('Harrogate'),
+('Harrow'),
+('Hart'),
+('Hartlepool'),
+('Hastings'),
+('Havant'),
+('Havering'),
+('Herefordshire'),
+('Hertsmere'),
+('High Peak'),
+('Hillingdon'),
+('Hinckley and Bosworth'),
+('Horsham'),
+('Hounslow'),
+('Huntingdonshire'),
+('Hyndburn'),
+('Ipswich'),
+('Isle of Wight'),
+('Isles of Scilly'),
+('Islington'),
+('Kensington and Chelsea'),
+('Kettering'),
+('King\'s Lynn and West Norfolk'),
+('Kingston upon Hull'),
+('Kingston upon Thames'),
+('Kirklees'),
+('Knowsley'),
+('Lambeth'),
+('Lancaster'),
+('Leeds'),
+('Leicester'),
+('Lewes'),
+('Lewisham'),
+('Lichfield'),
+('Lincoln'),
+('Liverpool'),
+('Luton'),
+('Maidstone'),
+('Maldon'),
+('Malvern Hills'),
+('Manchester'),
+('Mansfield'),
+('Medway'),
+('Melton'),
+('Mendip'),
+('Merton'),
+('Mid Devon'),
+('Mid Suffolk'),
+('Mid Sussex'),
+('Middlesbrough'),
+('Milton Keynes'),
+('Mole Valley'),
+('New Forest'),
+('Newark and Sherwood'),
+('Newcastle upon Tyne'),
+('Newcastle-under-Lyme'),
+('Newham'),
+('North Devon'),
+('North Dorset'),
+('North East Derbyshire'),
+('North East Lincolnshire'),
+('North Hertfordshire'),
+('North Kesteven'),
+('North Lincolnshire'),
+('North Norfolk'),
+('North Somerset'),
+('North Tyneside'),
+('North Warwickshire'),
+('North West Leicestershire'),
+('Northampton'),
+('Northumberland'),
+('Norwich'),
+('Nottingham'),
+('Nuneaton and Bedworth'),
+('Oadby and Wigston'),
+('Oldham'),
+('Oxford'),
+('Pendle'),
+('Peterborough'),
+('Plymouth'),
+('Poole'),
+('Portsmouth'),
+('Preston'),
+('Purbeck'),
+('Reading'),
+('Redbridge'),
+('Redcar and Cleveland'),
+('Redditch'),
+('Reigate and Banstead'),
+('Ribble Valley'),
+('Richmond upon Thames'),
+('Richmondshire'),
+('Rochdale'),
+('Rochford'),
+('Rossendale'),
+('Rother'),
+('Rotherham'),
+('Rugby'),
+('Runnymede'),
+('Rushcliffe'),
+('Rushmoor'),
+('Rutland'),
+('Ryedale'),
+('Salford'),
+('Sandwell'),
+('Scarborough'),
+('Sedgemoor'),
+('Sefton'),
+('Selby'),
+('Sevenoaks'),
+('Sheffield'),
+('Shepway'),
+('Shropshire'),
+('Slough'),
+('Solihull'),
+('South Buckinghamshire'),
+('South Cambridgeshire'),
+('South Derbyshire'),
+('South Gloucestershire'),
+('South Hams'),
+('South Holland'),
+('South Kesteven'),
+('South Lakeland'),
+('South Norfolk'),
+('South Northamptonshire'),
+('South Oxfordshire'),
+('South Ribble'),
+('South Somerset'),
+('South Staffordshire'),
+('South Tyneside'),
+('Southampton'),
+('Southend-on-Sea'),
+('Southwark'),
+('Spelthorne'),
+('St Albans'),
+('St Edmundsbury'),
+('St. Helens'),
+('Stafford'),
+('Staffordshire Moorlands'),
+('Stevenage'),
+('Stockport'),
+('Stockton-on-Tees'),
+('Stoke-on-trent'),
+('Stratford-on-Avon'),
+('Stroud'),
+('Suffolk Coastal'),
+('Sunderland'),
+('Surrey Heath'),
+('Sutton'),
+('Swale'),
+('Swindon'),
+('Tameside'),
+('Tamworth'),
+('Tandridge'),
+('Taunton Deane'),
+('Teignbridge'),
+('Telford and Wrekin'),
+('Tendring'),
+('Test Valley'),
+('Tewkesbury'),
+('Thanet'),
+('Three Rivers'),
+('Thurrock'),
+('Tonbridge and Malling'),
+('Torbay'),
+('Torridge'),
+('Tower Hamlets'),
+('Trafford'),
+('Tunbridge Wells'),
+('Uttlesford'),
+('Vale of White Horse'),
+('Wakefield'),
+('Walsall'),
+('Waltham Forest'),
+('Wandsworth'),
+('Warrington'),
+('Warwick'),
+('Watford'),
+('Waveney'),
+('Waverley'),
+('Wealden'),
+('Wellingborough'),
+('Welwyn Hatfield'),
+('West Berkshire'),
+('West Devon'),
+('West Dorset'),
+('West Lancashire'),
+('West Lindsey'),
+('West Oxfordshire'),
+('West Somerset'),
+('Westminster'),
+('Weymouth and Portland'),
+('Wigan'),
+('Wiltshire'),
+('Winchester'),
+('Windsor and Maidenhead'),
+('Wirral'),
+('Woking'),
+('Wokingham'),
+('Wolverhampton'),
+('Worcester'),
+('Worthing'),
+('Wychavon'),
+('Wycombe'),
+('Wyre'),
+('Wyre Forest'),
+('York');

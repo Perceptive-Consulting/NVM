@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+		
+        <!-- 
+	        Dear {landlord first and second name}, this is to notify you that your property details at {postcode} have been updated 
+	        and the property application process is [Status-> 80 % complete; 60% Complete; 100 % complete etc] 
+        -->
+		
+		 Dear <span th:text="${landlordName}"></span>, this is to notify you that your property details at <span th:text="${postCode}"></span> have been updated 
+	     and the property application process is  <span th:text="${status}">%</span> complete. 
+		
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

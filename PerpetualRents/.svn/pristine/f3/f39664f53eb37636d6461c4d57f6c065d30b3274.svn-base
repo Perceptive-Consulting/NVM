@@ -1,0 +1,112 @@
+<script src="<%=request.getContextPath()%>/resource/perpetual/admin/pdProperty/pdProperty.js"></script>
+<script src="<%=request.getContextPath()%>/resource/perpetual/admin/property/property-validation.js"></script>
+<div class="container">
+  <sections class="contant-area">
+    <div class="button">
+    <button id="viewButtonId">View</button>
+      <button id="editButtonId" style="display: none;">Edit</button>
+      <button id="createButtonId" style="display: none;">Create</button>
+      <button id="deleteButtonId" style="display: none;">Delete</button>
+    </div><!-- table  --><!--  -->
+    
+        <table id="dataTableId" class="table display table-bordered"  cellspacing="0">
+    <thead>
+        <tr>
+            <th>S.No.</th>
+             <th>Created On</th>
+            <th>Contact Person</th>
+            <th>City</th>
+            <th>Reference</th>
+            <th>Status</th>
+            <th>Post Code</th>
+        </tr>
+    </thead>
+</table>
+  </sections>
+</div>
+
+
+
+<div style="display:none;">
+  <div id='edit'>
+    <form id="editPopupForm" action="javascript:editPopupForm()">
+      <h1>Edit Property Details</h1>
+      <div class="form-element">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td width="40%"><label>Contact Person:</label></td>
+            <td width="60%"><input type="text" value="" class="" name="contactPerson" id="contactPerson"/></td>
+          </tr>         
+          <tr>
+            <td><label>Agent Name:</label></td>
+            <td><input type="text" value="" class="" name="agentName" id="agentName"/></td>
+          </tr>
+          <tr>
+            <td><label>Agent Contact Number:</label></td>
+            <td><input type="text" value="" class="" name="agentContactNumber" id="agentContactNumber"/></td>
+          </tr>
+          <tr>
+            <td><label>Agent Address:</label></td>
+            <td><input type="text" value="" class="" name="agentAddressLine" id="agentAddressLine"/></td>
+          </tr>
+        </table>
+      </div>
+      <div id="edit_footer"><input type="submit" value="Update" /></div>
+    </form>
+  </div>
+   <div id='create'>
+    <form id="createPopupFormId" action="javascript:createPopupForm()">
+      <h1>Register Property</h1>
+      <div class="form-element1">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td width="25%"><label>City:</label>
+            <input type="text" value="" class="" name="addressObj.city" /></td>
+            <td width="25%"><label>PostCode:</label>
+            <input type="text" value="" class="" name="addressObj.postCode" /></td>
+          </tr>
+          <tr>
+            <td><label>First Name:</label>
+            <input type="text" value="" class="" name="firstName" /></td>
+            <td><label>Last Name:</label>
+            <input type="text" value="" class="" name="lastName" /></td>
+          </tr>
+          <tr>
+            <td><label>Primary Email Id:</label>
+            <input type="text" value="" class="" name="primaryEmailId" /></td>
+            <td><label>Secondary Email Id:</label>
+            <input type="text" value="" class="" name="secondaryEmailId" /></td>
+          </tr>
+          <tr>
+            <td><label>Primary Contact Number:</label>
+            <input type="text" value="" class="" name="primaryPhoneNumber" /></td>
+            <td><label>Secondary Contact Number:</label>
+            <input type="text" value="" class="" name="secondaryPhoneNumber" /></td>
+          </tr>
+          <tr>
+            <td><label>User Name:</label>
+            <input type="text" value="" class="" name="loginObj.username" /></td>
+            <td><label>Password:</label>
+            <input type="text" value="" class="" name="loginObj.password" /></td>
+          </tr>
+          <tr>
+            <td><label>Address Line 1:</label>
+            <input type="text" value="" class="" name="addressObj.addressLine1" /></td>
+            <td><label>Address line 2:</label>
+            <input type="text" value="" class="" name="addressObj.addressLine2" /></td>
+          </tr>
+        </table>
+      </div>
+      <div id="create_footer"><input type="submit" value="Create" /></div>
+    </form>
+  </div>
+  
+     <div id='delete'>
+    <form id="deletePopupFormId" action="javascript:editPopupForm()">
+      <h1>Delete Property</h1>
+      <div class="form-element">
+      </div>
+      <div id="delete_footer"><input id="delete_yes" type="button" value="Yes" style="background-color:#E33A0C"/>&nbsp&nbsp<input id="delete_no" type="button" value="No" /></div>
+    </form>
+  </div> 
+</div>

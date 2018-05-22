@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CommitComments>	<CommitComment>Bug-Fixing for
+	1. City addition
+	2. Admin Upload Documents @ Property
+	3. GTS Database re-initialised
+
+Released to GTS</CommitComment>
+	<CommitComment>Null Pointer possibility validated</CommitComment>
+	<CommitComment>Common Document Repository and sync with application document management
+UI/BUG fixed as reported</CommitComment>
+	<CommitComment>test sync</CommitComment>
+	<CommitComment>Fine-tunning - Few(8 pages lacking back button facility) Back Buttons @ Upload Document @ Property Developer</CommitComment>
+</CommitComments>

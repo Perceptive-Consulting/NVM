@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						http://www.springframework.org/schema/util 
+						http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+   
+   <!-- ===============================================JdbcTemplate=============================================== -->
+   
+   
+  <!--  <context:property-placeholder location="classpath:com/pcs/perpetualRents/util/config.properties"/> -->
+   
+	<!-- DEVELOPMENT -->
+	
+   	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://127.0.0.1:3306/perpetualdev"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="admin@pcs"></property>
+		<property name="maxIdle" value="2"></property>
+		<property name="validationQuery" value="SELECT 1"></property>
+		<property name="testWhileIdle" value="true"></property>
+	</bean>
+	
+	
+	<!-- GTS -->
+	<!--
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://127.0.0.1:3306/perpetualgts"/>
+		<property name="username" value="perpetualgts"/>
+		<property name="password" value="perpetualgts@pcs"/>
+		<property name="maxIdle" value="2"/>
+		<property name="initialSize" value="128"/>
+		<property name="validationQuery" value="SELECT 1"/>
+		<property name="testWhileIdle" value="true"/>
+	</bean>  	
+	-->
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<constructor-arg ref="dataSource"/>
+	</bean>
+	
+	<context:annotation-config/>
+	<context:component-scan base-package="com.pcs.perpetualRents.web.delegates"></context:component-scan>
+	<context:component-scan base-package="com.pcs.perpetualRents.dao.impl"></context:component-scan>
+	<context:component-scan base-package="com.pcs.perpetualRents.common.bean"></context:component-scan>
+	<context:component-scan base-package="com.pcs.perpetualRents.business.bean"></context:component-scan>
+	<context:component-scan base-package="com.pcs.perpetualRents.manager.impl"></context:component-scan>
+	<context:component-scan base-package="com.pcs.perpetualRents.util"></context:component-scan>		
+	<context:component-scan base-package="com.pcs.perpetualRents.manager.impl"></context:component-scan>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+	<!-- ===============================================MAIL CONFIGURATION=============================================== -->
+	
+	 <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="587" />
+		<property name="username" value="perpetual.rents@gmail.com" />
+		<property name="password" value="neville.nikhil" />
+		
+		<property name="javaMailProperties">
+			<props>
+            	<prop key="mail.smtp.auth">true</prop>
+            	<prop key="mail.smtp.starttls.enable">true</prop>
+        	</props>
+		</property>
+	</bean> 
+	
+	<bean id="applicationSettings" class="com.pcs.perpetualRents.common.bean.ApplicationSettings">
+		<property name="userName" value="super" />
+		<property name="adminEmailId" value="tarun@perceptive-solutions.com" />
+		<property name="controlEmailId" value="perpetual.rents@gmail.com" />
+		<property name="controlEmailPassword" value="neville.nikhil" />
+		<property name="sessionMaxAge" value="3000" />
+		<property name="folderName" value="uploadFiles" />
+		
+		<!-- DEVELOPMENT -->
+		
+		<property name="documentRepository" value="/perpetual-repository" />
+		
+		
+		<!-- GTS -->
+		<!--
+		<property name="documentRepository" value="/var/www/html/perpetualgts/PerpetualDocs" />
+		-->
+		
+		<property name="adpl1FolderPath" value="No adpl1 Path" />
+		<property name="adpl3FolderPath" value="No adpl3 Path" />
+		<property name="landLordRegisterationFolderPath" value="No landLordRegisterationFolder Path" />
+		<property name="contractorDocumentFolderPath" value="No contractorDocumentFolder Path" />
+		
+		<property name="commonEmailSenderName" value="Admin" />
+		<property name="wordPressUrl" value="http://54.191.172.136:82/thenovoidsman/" /> 
+	</bean>
+
+	<bean id="developmentSettings" class="com.pcs.perpetualRents.common.bean.DevelopmentSettings">
+		<property name="showSQL" value="false" />
+		<property name="showStackTrace" value="false" />
+		<property name="showLOG" value="false" />
+	</bean>
+	
+	<bean id="templateResolver" class="org.thymeleaf.templateresolver.ClassLoaderTemplateResolver">
+	    <property name="prefix" value="com/pcs/perpetualRents/mailTemplate/" />
+	    <property name="templateMode" value="HTML5" />
+	    <property name="characterEncoding" value="UTF-8" />
+	    <property name="order" value="10" />
+	</bean>
+	
+	<bean id="templateEngine" class="org.thymeleaf.spring3.SpringTemplateEngine">
+	  <property name="templateResolver" ref="templateResolver" />
+	</bean>
+
+    <bean id="viewResolver1" class="org.thymeleaf.spring3.view.ThymeleafViewResolver">
+	    <property name="templateEngine" ref="templateEngine" />
+	    <property name="characterEncoding" value="UTF-8" />
+	</bean>      
+
+	<bean id="syncMailUtilityCronObj" class="com.pcs.perpetualRents.util.mail.SynchronizeMailUtility" autowire="byType"></bean>
+
+	<bean id="conTimerDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="syncMailUtilityCronObj" />
+		<property name="targetMethod" value="synchronizeMailRead" />
+		<property name="concurrent" value="false" />
+	</bean>
+
+	<bean id="syncMailUtilityCronTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="conTimerDetail" />
+		<property name="cronExpression" value="0 0/10 * * * ?" />
+	</bean>
+
+	<bean id="autoProcessSchduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="syncMailUtilityCronTimerTrigger" />
+			</list>
+		</property>
+	</bean>			
+			
+</beans>

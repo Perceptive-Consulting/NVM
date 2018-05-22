@@ -1,0 +1,127 @@
+package com.pcs.perpetualRents.manager.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.pcs.perpetualRents.business.bean.File;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.commonFunction.CommonFunctions;
+import com.pcs.perpetualRents.dao.FileDAO;
+import com.pcs.perpetualRents.manager.FileManager;
+
+@Service
+public class FileManagerImpl implements FileManager {
+	
+	@Autowired
+	private FileDAO fileDAO;
+	@Autowired
+	private ApplicationSettings applicationSettings;
+	
+	@Override
+	public Long saveFile(File fileObj, Long createdUserId) {
+		String tPath = CommonFunctions.savePropertyFile(applicationSettings.getFolderPath(), applicationSettings.getFolderName(), fileObj);
+		System.out.println(tPath);
+		if(tPath != null){
+			if(tPath.contains("\\")){
+				tPath = tPath.replaceAll("\\\\", "/");
+				fileObj.setFilePath(tPath);
+				Long fileId = fileDAO.saveFile(fileObj, createdUserId);
+				if(fileId != null)
+					return fileId;
+			
+			}else{
+				fileObj.setFilePath(tPath);
+				Long fileId = fileDAO.saveFile(fileObj, createdUserId);
+				if(fileId != null)
+					return fileId;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Long saveAdminFile(File fileObj, Long createdUserId) {
+		String tPath = CommonFunctions.saveAdminFile(applicationSettings.getFolderPath(), applicationSettings.getFolderName(), fileObj);
+		System.out.println(tPath);
+		if(tPath != null){
+			if(tPath.contains("\\")){
+				tPath = tPath.replaceAll("\\\\", "/");
+				fileObj.setFilePath(tPath);
+				Long fileId = fileDAO.saveFile(fileObj, createdUserId);
+				if(fileId != null)
+					return fileId;
+			
+			}else{
+				fileObj.setFilePath(tPath);
+				Long fileId = fileDAO.saveFile(fileObj, createdUserId);
+				if(fileId != null)
+					return fileId;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public File loadFileById(Long fileId) {
+		System.out.println(" FILE ID IS----- :: "+fileId);
+		File fileObj = fileDAO.loadFileById(fileId);
+		if(fileObj != null){
+			System.out.println(" file Object ------- inside mgr--- :: " +fileObj.toString());
+			String realPath = applicationSettings.getFolderPath().replace(applicationSettings.getFolderName(), "");
+			fileObj.setFilePath(realPath + java.io.File.separator + fileObj.getFilePath());
+			CommonFunctions.loadfile(fileObj);
+			return fileObj;
+	}  System.out.println(" file object is  NULL ---- INSIDE MANAGERiMPL");
+		return null;
+	}
+
+	@Override
+	public List<File> loadFileByObjectType(Long objectType, Long objectId) {
+		List<File>  files = fileDAO.loadFileByObjectType(objectType, objectId);
+		if(files != null && !files.isEmpty()){
+			for (File file : files) {
+				CommonFunctions.loadfile(file);
+			}
+			return files;
+		}
+		return null;
+	}
+
+/*	@Override
+	public Long saveAdminFile(File fileObj, Long createdUserId) {
+		String tPath = CommonFunctions.saveAdminFile(applicationSettings.getFolderPath(), applicationSettings.getFolderName(), fileObj);
+		System.out.println(tPath);
+		if(tPath != null){
+			if(tPath.contains("\\")){
+				tPath = tPath.replaceAll("\\\\", "/");
+				fileObj.setFilePath(tPath);
+				Long fileId = fileDAO.saveFile(fileObj, createdUserId);
+				if(fileId != null)
+					return fileId;
+			
+			}else{
+				fileObj.setFilePath(tPath);
+				Long fileId = fileDAO.saveFile(fileObj, createdUserId);
+				if(fileId != null)
+					return fileId;
+			}
+		}
+		return null;
+	}*/
+	
+	@Override
+	public void deleteFileById(Long fileId) {
+		File tFile = fileDAO.loadFileById(fileId);
+		if(tFile != null){
+			String realPath = applicationSettings.getFolderPath().replace(applicationSettings.getFolderName(), "");
+			tFile.setFilePath(realPath + java.io.File.separator + tFile.getFilePath());
+			boolean fileStatus = CommonFunctions.deleteFile(tFile);
+			System.out.println("CommonFunctions.deleteFile(tFile) : " + fileStatus);
+			System.out.println("File to be delete : " + fileId);
+			if(fileStatus)
+				fileDAO.deleteFileById(fileId);
+		}
+	}
+}

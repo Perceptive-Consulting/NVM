@@ -1,0 +1,815 @@
+package com.pcs.perpetualRents.manager.impl;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.pcs.perpetualRents.business.bean.ADPL;
+import com.pcs.perpetualRents.business.bean.Address;
+import com.pcs.perpetualRents.business.bean.Admin;
+import com.pcs.perpetualRents.business.bean.AdminUploadDocuments;
+import com.pcs.perpetualRents.business.bean.City;
+import com.pcs.perpetualRents.business.bean.File;
+import com.pcs.perpetualRents.business.bean.LandLord;
+import com.pcs.perpetualRents.business.bean.Property;
+import com.pcs.perpetualRents.business.bean.PropertyDocument;
+import com.pcs.perpetualRents.business.bean.PropertyMarketingInformation;
+import com.pcs.perpetualRents.business.bean.PropertyQuestions;
+import com.pcs.perpetualRents.business.bean.PropertyResponse;
+import com.pcs.perpetualRents.business.bean.QuestionGroup;
+import com.pcs.perpetualRents.business.bean.UserLogin;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.dao.AddressDAO;
+import com.pcs.perpetualRents.dao.AdminDocumentDAO;
+import com.pcs.perpetualRents.dao.CityDAO;
+import com.pcs.perpetualRents.dao.IdentityGeneratorDAO;
+import com.pcs.perpetualRents.dao.PropertyDAO;
+import com.pcs.perpetualRents.dao.PropertyQuestionsDAO;
+import com.pcs.perpetualRents.dao.PropertyResponseDAO;
+import com.pcs.perpetualRents.enm.ADPL2Page;
+import com.pcs.perpetualRents.enm.AdminDocuments;
+import com.pcs.perpetualRents.enm.ObjectType;
+import com.pcs.perpetualRents.enm.Status;
+import com.pcs.perpetualRents.enm.UserType;
+import com.pcs.perpetualRents.manager.FileManager;
+import com.pcs.perpetualRents.manager.LandLordManager;
+import com.pcs.perpetualRents.manager.PropertyManager;
+import com.pcs.perpetualRents.manager.PropertyResponseManager;
+import com.pcs.perpetualRents.manager.UserAdminManager;
+import com.pcs.perpetualRents.util.ADPLCreator;
+
+@Service
+@Transactional
+public class PropertyManagerImpl implements PropertyManager {
+	
+	private static Logger logger = ApplicationSettings.getLogger(PropertyManagerImpl.class.getName());
+
+	@Autowired
+	private PropertyDAO propertyDAO;
+	@Autowired
+	private PropertyResponseDAO propertyResponseDAO;
+	@Autowired
+	private AddressDAO addressDAO;
+	@Autowired
+	private CityDAO cityDAO;
+	@Autowired
+	private IdentityGeneratorDAO gereratorDAO;
+	@Autowired
+	private UserAdminManager userAdminManager;
+	@Autowired
+	private PropertyQuestionsDAO propertyQuestionsDAO;
+	@Autowired
+	private LandLordManager landLordManager;
+	@Autowired
+	private ADPLCreator adplCreator;
+	@Autowired
+	private FileManager fileManager;
+	@Autowired
+	private ApplicationSettings applicationSettings;  
+	@Autowired
+	private PropertyResponseManager propertyResponseManager;
+	@Autowired
+	private AdminDocumentDAO adminDocumentDAO;
+	
+	@Override
+	public boolean deleteDocumentById(final Long propertyDocumentId){
+		if(propertyDocumentId == null)
+			return false;
+		
+		return propertyDAO.deletePropertyDocumentById(propertyDocumentId);
+	}
+	
+	@Override
+	public void loadAdminUploadDocument(final Property tPropertyObj){
+		if(tPropertyObj == null || tPropertyObj.getId() == null)
+			return;
+		
+		propertyDAO.loadAdminUploadDocument(tPropertyObj);
+	}
+	
+	
+	@Override
+	public List<PropertyDocument> loadPropertyAdminUploadDocument(final Property tPropertyObj){
+		return propertyDAO.loadPropertyAdminUploadDocument(tPropertyObj);
+	}
+
+	@Override
+	public PropertyDocument findDocumentById(final long documentId){
+		return null;
+	}
+	
+	
+	public boolean changePropertyDocumentStatus(Long documentId) {
+		propertyDAO.updatePDPropertyStatus(documentId);
+		return false;
+	}
+
+	
+	
+	public boolean checkPropertyAdminUploadDocument(Long propertyId){
+		//Property propertyDeveloperObj = loadPropertyByLandlord(landLordObj)
+		Property pdPropertyObj =  loadPropertyById(propertyId);
+		List<PropertyDocument> adminUploadedDoc = propertyDAO.loadPropertyAdminUploadDocument(pdPropertyObj);
+		//System.out.println("!!!!!!!!!!!!!!!!!!!!!!  "+adminUploadedDoc);
+	
+		return (adminUploadedDoc == null || adminUploadedDoc.size() == 0) ?  false :  true;
+		
+	}
+	
+	
+	@Override
+	public boolean savePropertyDocument(PropertyDocument documentsObj, Long createdUserId){
+		return propertyDAO.savePropertyDocuments(documentsObj, createdUserId);
+	}
+	
+	@Override
+	public boolean saveProperty(Property propertyObj, Long createdUserId) {
+		
+		if (propertyObj == null) {
+			return false;
+		}
+		
+		Address addressObj = propertyObj.getAddressObj();
+
+		if (addressObj == null) {
+			return false;
+		}
+		propertyObj.setStatusId((short) Status.UNAPPROVED.id());
+		propertyObj.setStatusPercentage(0);
+		propertyObj.setUniqueReference(gereratorDAO.getUniqueReference("Property"));
+		Long propertyId = propertyDAO.savePropertyDetails(propertyObj,
+				createdUserId);
+		if (propertyId == null) {
+			return false;
+		}
+
+		propertyObj.setId(propertyId);
+		String _cityIdStr = addressObj.getCity();
+		if (_cityIdStr != null) {
+			City cityObj = cityDAO.loadCityById(Long.valueOf(_cityIdStr));
+			if (cityObj != null) {
+				addressObj.setCity(cityObj.getCity());
+				addressObj.setObjectId(propertyId);
+				addressObj.setObjectType(ObjectType.PROPERTY.id());
+				addressDAO.createAddress(addressObj, createdUserId);
+			}
+		}
+		
+		
+		return true;
+	}
+
+	@Override
+	public List<Property> loadAll(Integer start, Integer limit, UserLogin loginObj) {
+		List<Property> propList = null;
+		if(loginObj != null){
+			if(loginObj.getUserTypeId() == UserType.SUPER_ADMIN.id()){
+				 propList = propertyDAO.loadAll(start, limit);
+				if (propList != null) {
+					for (Property _propObj : propList) {
+						List<Address> addressList = addressDAO.loadAddressById(ObjectType.PROPERTY.id(), _propObj.getId());
+						if (addressList != null && !addressList.isEmpty()) {
+							_propObj.setAddressObj(addressList.get(0));
+						}
+					}
+					return propList;
+				}
+			}else if(loginObj.getUserTypeId() == UserType.ADMIN.id()){
+				Admin adminObj = userAdminManager.loadUserByLoginObj(loginObj);
+				if(adminObj != null){
+					List<City> tCityList = cityDAO.loadCityByObjectId(ObjectType.ADMIN.id(), adminObj.getId());
+					
+					if(tCityList != null && !tCityList.isEmpty()){
+						propList = new ArrayList<Property>();
+						for (City city : tCityList) {
+							List<Address> addressList = addressDAO.loadAddressByCity(city.getCity(), ObjectType.PROPERTY.id());
+							if(addressList != null && !addressList.isEmpty()){
+								for (Address addressObj : addressList) {
+									Property propertyObj = propertyDAO.loadPropertyById(addressObj.getObjectId());
+									if(propertyObj != null){
+										propList.add(propertyObj);
+										List<Address> tAddressList = addressDAO.loadAddressById(ObjectType.PROPERTY.id(), propertyObj.getId());
+										if (tAddressList != null && !tAddressList.isEmpty()) {
+											propertyObj.setAddressObj(tAddressList.get(0));
+										}
+									}
+								}
+							}
+						}
+						if(propList != null && !propList.isEmpty()){
+							return propList;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean updateMarketingInfo(PropertyMarketingInformation marketingObj, Long createdUserId) {
+		try {
+			if (marketingObj != null) {
+				PropertyMarketingInformation infoObj = propertyDAO.loadMarketingInfoByPropertyId(marketingObj.getPropertyId());
+				if (infoObj != null) {
+					propertyDAO.updateMarketingInfo(marketingObj);
+					List<File> files = marketingObj.getFiles();
+					if (files != null && !files.isEmpty()) {
+						for (File tFileObj : files) {
+							if(tFileObj != null){
+								tFileObj.setObjectType(ObjectType.PROPERTY_MARKETING.id());
+								tFileObj.setObjectId(infoObj.getId());
+								fileManager.saveFile(tFileObj, createdUserId);
+							}
+						}
+					}
+				} else {
+					Long marketingId = propertyDAO.saveMarketingInfo(marketingObj);
+					if (marketingId != null) {
+						List<File> files = marketingObj.getFiles();
+						if (files != null && !files.isEmpty()) {
+							for (File tFileObj : files) {
+								tFileObj.setObjectType(ObjectType.PROPERTY_MARKETING.id());
+								tFileObj.setObjectId(marketingId);
+								fileManager.saveFile(tFileObj, createdUserId);
+
+							}
+						}
+					}
+					if (marketingId != null)
+						return true;
+				}
+			}
+			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public boolean updateProperty(Property propertyObj, Long modifiedUserId) {
+		try {
+			if (propertyObj != null) {
+				propertyDAO.updatePropertyDetails(propertyObj, modifiedUserId);
+				Address addressObj = propertyObj.getAddressObj();
+				if (addressObj != null) {
+					addressDAO.updateAddress(addressObj, modifiedUserId);
+				}
+			}
+
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public boolean savePropertyResponse(List<PropertyResponse> currentResponseList, Long userId,List<PropertyResponse> savedResponseList) {
+		boolean execStatus = false;
+		Map<String, PropertyResponse> resMap = getResponseMap(savedResponseList);
+		if (currentResponseList != null && !currentResponseList.isEmpty()) {
+			for (PropertyResponse currResponseObj : currentResponseList) {
+				Long questionId = propertyQuestionsDAO.getQuestionIdByFieldName(currResponseObj.getFieldName());
+				if(questionId != null){
+					currResponseObj.setQuestionId(questionId);
+					PropertyResponse savedResponseObj = resMap.get(currResponseObj.getFieldName());
+					if (savedResponseObj != null) {
+						if (currResponseObj.compareOldNewPropertyResponse(savedResponseObj)) {
+							File fileObj = currResponseObj.getFileObj();
+							if (fileObj != null) {
+								Long fileId = fileManager.saveFile(fileObj, userId);
+								if (fileId != null) {
+									currResponseObj.setDocumentId(fileId);
+								}else{
+									Long savedFileId = savedResponseObj.getDocumentId();
+									currResponseObj.setDocumentId(savedFileId);
+								}
+								propertyDAO.updatePropertyFile(currResponseObj,	userId);
+							}
+						} else {
+							Long fileId = null;
+							File fileObj = currResponseObj.getFileObj();
+							if (fileObj != null) {
+								fileId = fileManager.saveFile(fileObj, userId);
+								if (fileId != null)
+									currResponseObj.setDocumentId(fileId);
+							}else{
+								Long savedFileId = savedResponseObj.getDocumentId();
+								currResponseObj.setDocumentId(savedFileId);
+							}
+							execStatus = propertyDAO.updatePropertyResponse(currResponseObj, userId);
+						}
+					} else {
+						Long fileId = null;
+						File fileObj = currResponseObj.getFileObj();
+						if (fileObj != null) {
+							fileId = fileManager.saveFile(fileObj, userId);
+							if (fileId != null)
+								currResponseObj.setDocumentId(fileId);
+						}
+						execStatus = propertyDAO.savePropertyResponse(currResponseObj, userId);
+					}
+
+				
+				}
+			}
+		}
+
+		if (execStatus)
+			return true;
+		else
+			return false;
+	}
+
+	@Override
+	public Double getStatus(Long propertyId, ADPL2Page page) {
+		List<PropertyResponse> responseList = loadResponseByPropertyId(propertyId, page);
+		Map<String, PropertyQuestions> questionMap = null;
+		ADPL2Page pageObj = ADPL2Page.get(page.id());
+
+		List<PropertyQuestions> questionList = new ArrayList<PropertyQuestions>();
+		String[] groupIdStr = pageObj.group().split(",");
+		for (String _groupStr : groupIdStr) {
+			List<PropertyQuestions> tqList = propertyResponseDAO.loadQuestionByGroupId(Long.valueOf(_groupStr.trim()));
+			if (tqList != null)
+				questionList.addAll(tqList);
+		    }
+		if (questionList != null && !questionList.isEmpty()) {
+			questionMap = getQuestionMap(questionList);
+		}
+
+		if (responseList != null) {
+			Double status = 0.0;
+			if (page.equals(ADPL2Page.DHS_CRITERIA_B)) {
+				List<PropertyQuestions> tempQuestionList = propertyResponseManager.loadQuestionByADPL(ADPL2Page.DHS_CRITERIA_B);
+				Integer totalQuestionCount = tempQuestionList.size();
+				Integer successCount = checkCriteriaB(responseList, questionMap);
+				if (successCount >= (totalQuestionCount - 2)){
+					status = 22.00;
+				}
+			}else if (page.equals(ADPL2Page.DHS_CRITERIA_C)) {
+				List<PropertyQuestions> tempQuestionList = propertyResponseManager.loadQuestionByADPL(ADPL2Page.DHS_CRITERIA_B);
+				Integer totalQuestionCount = tempQuestionList.size();
+				Integer successCount = checkCriteriaB(responseList, questionMap);
+				if (successCount >= (totalQuestionCount - 3)){
+					status = 22.00;
+				}
+			}else {
+				status = calculateStatus(responseList, questionMap);
+			}
+
+			return status;
+		}
+		return 0.0;
+	}
+	
+	public String getStatus(Long propertyId){
+		 List<ADPL2Page> adplList = ADPL2Page.list();
+		 Double status = 0.0;
+		 for (ADPL2Page adplObj : adplList) {
+			 status += getStatus(propertyId, adplObj);
+		}
+		 status = Math.floor(status);
+		 if(status > 100)
+			 status = 100.0;
+		 DecimalFormat dc = new DecimalFormat("#");
+		 String st = dc.format(status);
+		 
+		 return st;
+	}
+
+	@Override
+	public Map<String, PropertyResponse> getResponseMap(List<PropertyResponse> savedResponseList) {
+		Map<String, PropertyResponse> map = new HashMap<String, PropertyResponse>();
+		if (savedResponseList != null && !savedResponseList.isEmpty()) {
+			for (PropertyResponse _resObj : savedResponseList) {
+				map.put(_resObj.getFieldName(), _resObj);
+			}
+		}
+
+		return map;
+	}
+
+	private Map<String, PropertyQuestions> getQuestionMap(List<PropertyQuestions> questionList) {
+		Map<String, PropertyQuestions> map = new HashMap<String, PropertyQuestions>();
+		if (questionList != null && !questionList.isEmpty()) {
+			for (PropertyQuestions _quesObj : questionList) {
+				map.put(_quesObj.getFieldName(), _quesObj);
+			}
+		}
+
+		return map;
+	}
+
+	@Override
+	public Property loadPropertyById(Long id) {
+		try {
+			Property tPropertyObj = propertyDAO.loadPropertyById(id);
+			List<Address> addressList = addressDAO.loadAddressById(ObjectType.PROPERTY.id(), id);
+			if (addressList != null && !addressList.isEmpty())
+				if (tPropertyObj != null)
+					tPropertyObj.setAddressObj(addressList.get(0));
+			
+			
+			return tPropertyObj;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public PropertyMarketingInformation loadMarketingInfoByPropertyId(Long propertyId) {
+		try {
+			PropertyMarketingInformation tInfoObj = propertyDAO.loadMarketingInfoByPropertyId(propertyId);
+			if (tInfoObj != null) {
+				List<File> files = fileManager.loadFileByObjectType(ObjectType.PROPERTY_MARKETING.id(), tInfoObj.getId());
+				if (files != null && !files.isEmpty()) {
+					tInfoObj.getFiles().addAll(files);
+				}
+				return tInfoObj;
+			}
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	@Override
+	public List<File> loadPropertyImage(final Long objectTypeId, final Long objectId){
+		PropertyMarketingInformation obj =  propertyDAO.loadMarketingInfoByPropertyId(objectId);
+		if(obj != null){
+			List<File> files = fileManager.loadFileByObjectType(ObjectType.PROPERTY_MARKETING.id(), obj.getId());
+			if (files != null && !files.isEmpty()) {
+				return files;
+			}
+		}
+		
+		return null;
+	}
+
+	@Override
+	public List<Property> loadPropertyByLandlord(LandLord landLordObj) {
+		List<Property> propList = propertyDAO.loadPropertyByLandlord(landLordObj);
+		if (propList != null) {
+			for (Property _propObj : propList) {
+				List<Address> addressList = addressDAO.loadAddressById(ObjectType.PROPERTY.id(), _propObj.getId());
+				if (addressList != null && !addressList.isEmpty()) {
+					_propObj.setAddressObj(addressList.get(0));
+				}
+				List<ADPL2Page> adplList = ADPL2Page.list();
+				Double status = 0.0;
+				for (ADPL2Page adplObj : adplList) {
+					status += getStatus(_propObj.getId(), adplObj);
+				}
+				status = Math.floor(status);
+				if (status > 100.00)
+					status = 100.00;
+
+				String ss = new DecimalFormat("#").format(status);
+
+				_propObj.setStatusPercentage(Integer.parseInt(ss));
+			}
+			return propList;
+		}
+
+		return null;
+	}
+
+	@Override
+	public List<PropertyResponse> loadResponseByPropertyId(Long properyId,ADPL2Page page) {
+
+		List<PropertyQuestions> questionList = new ArrayList<PropertyQuestions>();
+		String[] groupId = page.group().split(",");
+		for (String id : groupId) {
+			List<PropertyQuestions> tList = propertyQuestionsDAO.loadPropertyQuestionByPropertyGroup(Long.valueOf(id.trim()));
+			if (tList != null && !tList.isEmpty())
+				questionList.addAll(tList);
+		}
+
+		List<PropertyResponse> responseList = propertyQuestionsDAO.loadResponseByPropertyAndQuestion(properyId, questionList);
+
+		if (responseList != null && !responseList.isEmpty()) {
+			
+			return responseList;
+		}
+
+		return null;
+	}
+
+	public List<PropertyQuestions> loadPropertyQuestionByPropertyGroup(Long groupId) {
+		try {
+
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public Double calculateStatus(List<PropertyResponse> responseList, Map<String, PropertyQuestions> questionMap) {
+		if (responseList != null && !responseList.isEmpty()	&& questionMap != null && !questionMap.isEmpty()) {
+			Double status = 0.0;
+			PropertyResponse responseObj = null;
+			PropertyQuestions questionObj = null;
+			Double increment = 2.00;
+			Map<String, PropertyResponse> responseMap = getResponseMap(responseList);
+			
+			for (PropertyResponse tPropResponseObj : responseList) {
+				responseObj = responseMap.get(tPropResponseObj.getFieldName());
+				questionObj = questionMap.get(tPropResponseObj.getFieldName());
+				if (responseObj != null && questionObj != null && questionObj.isConsiderable()) {
+					String affirmativeAns = Boolean.toString(questionObj.isAffirmativeAns());
+					String responseStr = responseObj.getResponse();
+					if (responseStr != null) {
+						if (responseStr.equalsIgnoreCase(affirmativeAns)){
+							status = status + increment;
+						}else if(responseStr.equalsIgnoreCase("equalToTrue")){// For not applicable in some cases to increment the status of property.
+							status = status + increment;
+						}
+					}
+				}
+			}
+			return status;
+		}
+		return 0.0;
+	}
+
+	public Integer checkCriteriaB(List<PropertyResponse> responseList, Map<String, PropertyQuestions> questionMap) {
+		int counter = 0;
+		if (responseList != null && !responseList.isEmpty()	&& questionMap != null && !questionMap.isEmpty()) {
+			PropertyQuestions questionObj = null;
+			for (PropertyResponse resObj : responseList) {
+				questionObj = questionMap.get(resObj.getFieldName());
+				if(questionObj != null){
+					String affirmativeAns = Boolean.toString(questionObj.isAffirmativeAns());
+					String responseStr = resObj.getResponse();
+					if (responseStr != null) {
+						if (responseStr.equalsIgnoreCase(affirmativeAns))
+							counter++;
+					}
+				}
+			}
+		}
+		return counter;
+	}
+
+	public Integer checkCriteriaC(List<PropertyResponse> responseList, Map<String, PropertyQuestions> questionMap) {
+		int counter = 0;
+		if (responseList != null && !responseList.isEmpty()	&& questionMap != null && !questionMap.isEmpty()) {
+			PropertyQuestions questionObj = null;
+			for (PropertyResponse resObj : responseList) {
+				questionObj = questionMap.get(resObj.getFieldName());
+				if(questionObj != null){
+					String affirmativeAns = Boolean.toString(questionObj.isAffirmativeAns());
+					String responseStr = resObj.getResponse();
+					if (responseStr != null) {
+						if (!responseStr.equalsIgnoreCase(affirmativeAns))
+							counter++;
+					}
+				}
+			}
+		}
+		return counter;
+	}
+
+	public PropertyResponse loadPropertyResponseByFieldName(Long propertyId, String fieldName) {
+		try {
+			PropertyResponse responseObj = propertyDAO.loadPropertyResponseByFieldName(propertyId, fieldName);
+			if (responseObj != null){
+				File fileObj = responseObj.getFileObj();
+				if(fileObj != null){
+					File tFile = fileManager.loadFileById(fileObj.getId());
+					responseObj.setFileObj(tFile);
+					return responseObj;
+				}
+			}
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public File loadADPL1File() {
+		AdminUploadDocuments docObj = adminDocumentDAO.loadByDocumentId(AdminDocuments.ADPL1.id());
+		if(docObj != null){
+			File fileObj = fileManager.loadFileById(docObj.getFileId());
+			return fileObj;
+		}
+		return null;
+	}
+
+	
+	@Override
+	public File landLordRegistrationFile() {
+		AdminUploadDocuments docObj = adminDocumentDAO.loadByDocumentId(AdminDocuments.BANKING_DOCUMENTS.id());
+		if(docObj != null){
+			File fileObj = fileManager.loadFileById(docObj.getFileId());
+			return fileObj;
+		}
+		return null;
+	}
+	
+	
+	@Override
+	public File loadADPL3File() {
+		AdminUploadDocuments docObj = adminDocumentDAO.loadByDocumentId(AdminDocuments.ADPL3.id());
+		if(docObj != null){
+			File fileObj = fileManager.loadFileById(docObj.getFileId());
+			return fileObj;
+		}
+		return null;
+	}
+	
+	
+	/*----------------------- nw Doc---------------*/
+
+	@Override
+	public List<File> bankStandingOrderFile() {
+		try{
+			java.io.File docfolderPath = new java.io.File(applicationSettings.getBankStandingOrderFolderPath());
+			if(docfolderPath.canRead()){
+				String files[] = docfolderPath.list();
+				if(files != null){
+					if(files.length == 0){
+						logger.severe("No Files found at path iiiii " + applicationSettings.getBankStandingOrderFolderPath());
+						return null;
+					}else if(files.length == 1){
+						java.io.File bankStandingFileObj = new java.io.File(applicationSettings.getBankStandingOrderFolderPath() + java.io.File.separator + files[0]);
+						logger.info("File path : " + bankStandingFileObj.getPath());
+						if(bankStandingFileObj != null && bankStandingFileObj.canRead()){
+							List<File> fileList = new ArrayList<File>();
+							File fileObj = new File();
+							ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+							FileInputStream fis = new FileInputStream(bankStandingFileObj);
+							IOUtils.copy(fis, bOut);
+							fileObj.setFileData(bOut.toByteArray());
+							fileObj.setFileName(bankStandingFileObj.getName());
+							
+							System.out.println(fileObj.toString());
+							
+							fileList.add(fileObj);
+							
+							return fileList;
+						}
+					}else{
+						List<File> fileList = new ArrayList<File>();
+						for (String fileName : files) {
+							java.io.File BankStandingFileObj = new java.io.File(applicationSettings.getBankStandingOrderFolderPath() + java.io.File.separator + fileName);
+							if(BankStandingFileObj != null && BankStandingFileObj.canRead()){
+								File fileObj = new File();
+								ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+								FileInputStream fis = new FileInputStream(BankStandingFileObj);
+								IOUtils.copy(fis, bOut);
+								fileObj.setFileData(bOut.toByteArray());
+								fileObj.setFileName(BankStandingFileObj.getName());
+								
+								fileList.add(fileObj);
+							}
+						}
+						return fileList;
+					}
+				}
+			}else{
+				System.out.println("Unable to read the Bank standing document " + applicationSettings.getBankStandingOrderFolderPath());
+				logger.severe("Unable to read the Bank standing document " + applicationSettings.getBankStandingOrderFolderPath());
+			}
+		}catch(IOException fne){
+			return null;
+		}
+		return null;
+	}
+	
+	@Override
+	public File loadADPL2PdfByPropertyId(final Long propertyId, final String logoPath){
+		try{
+			List<QuestionGroup> questionGroupDetails = propertyQuestionsDAO.loadAllPropertyQuestionsGroup();
+			if(questionGroupDetails != null && !questionGroupDetails.isEmpty()){
+				List<ADPL> adplQuestionList = null;
+				Map<Long, List<ADPL>> questionsMap = new TreeMap<Long, List<ADPL>>();
+				Map<Long, QuestionGroup> groupQuestionDataMap = new TreeMap<Long, QuestionGroup>();
+				for (QuestionGroup tGroupObj : questionGroupDetails) {
+					 adplQuestionList = new ArrayList<ADPL>();
+					 System.out.println("Groupt Name : " + tGroupObj.getCriteriaStr());
+					List<PropertyQuestions> questionList = propertyQuestionsDAO.loadPropertyQuestionByPropertyGroup(tGroupObj.getId());
+					if(questionList != null && !questionList.isEmpty()){
+						List<PropertyResponse> responseList = propertyQuestionsDAO.loadResponseByPropertyAndQuestion(propertyId, questionList);
+							Map<String, PropertyResponse> responseMap = getResponseMap(responseList);
+								ADPL tAdplObj = null;
+								for (PropertyQuestions tQuestionObj : questionList) {
+									System.out.println(tQuestionObj.getFieldName());
+										PropertyResponse tResponseObj = responseMap.get(tQuestionObj.getFieldName());
+										tAdplObj = new ADPL();
+  										tAdplObj.setQuestions(tQuestionObj.getQuestion());
+										if(tResponseObj != null){
+												tAdplObj.setComments(tResponseObj.getComments());
+												tAdplObj.setResponse(tResponseObj.getResponse());
+										}else{
+											tAdplObj.setResponse(null);
+										}
+										adplQuestionList.add(tAdplObj);
+								}
+					}
+					questionsMap.put(tGroupObj.getId(), adplQuestionList);
+					groupQuestionDataMap.put(tGroupObj.getId(), tGroupObj);
+				}
+				
+				Property tPropertObj = loadPropertyById(propertyId);
+				if(tPropertObj != null){
+					LandLord tlandloLord = landLordManager.loadLandlordById(tPropertObj.getLandlordId());
+					if(tlandloLord != null)
+						tPropertObj.setLandLordObj(tlandloLord);
+					byte[] pdfArr = adplCreator.generatePDF(questionsMap, tPropertObj, groupQuestionDataMap, logoPath);
+					File fileObj = null;
+					if(pdfArr != null && pdfArr.length != 0){
+						fileObj = new File();
+							fileObj.setFileData(pdfArr);
+							fileObj.setSize(pdfArr.length);
+							Address addressObj = tPropertObj.getAddressObj();
+							if(addressObj != null){
+								fileObj.setFileName("ADPL-"+addressObj.getPostCode());
+							}
+							return fileObj;
+						}
+					}
+			}
+			return null;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	@Override
+	public boolean disableProperty(Long propertyId) {
+		propertyDAO.disableProperty(propertyId);
+
+		return true;
+	}
+
+	@Override
+	public boolean enableProperty(Long propertyId) {
+		propertyDAO.enableProperty(propertyId);
+		return true;
+	}
+
+	@Override
+	public void approveProperty(Property propertyObj, Long userId) {
+		propertyDAO.approveProperty(propertyObj, userId);
+	}
+
+	@Override
+	public void disApproveProperty(Property propertyObj, Long userId) {
+		propertyDAO.disApproveProperty(propertyObj, userId);
+	}
+
+	@Override
+	public File loadFileById(Long fileId) {
+		if (fileId != null) {
+			File fileObj = fileManager.loadFileById(fileId);
+			if (fileObj != null)
+				return fileObj;
+		}
+		return null;
+	}
+
+	@Override
+	public void deleteFileById(Long fileId) {
+		if (fileId != null) {
+			fileManager.deleteFileById(fileId);
+		}
+	}
+	
+	@Override
+	public boolean deleteProperty(Long propertyId) {
+		boolean status = false;
+		if (propertyId != null) {
+			status = propertyDAO.deleteProperty(propertyId);
+			if (status)
+				status = status
+						&& addressDAO.deleteAddress(ObjectType.PROPERTY.id(),
+								propertyId);
+		}
+		return status;
+	}
+
+	
+	
+}

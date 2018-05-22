@@ -1,0 +1,335 @@
+package com.pcs.perpetualRents.dao.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.mysql.jdbc.Statement;
+import com.pcs.perpetualRents.business.bean.Authorities;
+import com.pcs.perpetualRents.business.bean.EditPassword;
+import com.pcs.perpetualRents.business.bean.UserLogin;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.common.bean.DevelopmentSettings;
+import com.pcs.perpetualRents.dao.UserLoginDAO;
+
+@Repository
+public class UserLoginDAOImpl implements UserLoginDAO {
+	
+	private static Logger logger = ApplicationSettings.getLogger(UserLoginDAOImpl.class.getName());
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	@Autowired
+	private DevelopmentSettings developmentSettings;
+
+	@Override
+	public Long createLoginUser(final UserLogin loginObj, final Long createdUserId) {
+			KeyHolder keyHolder = new GeneratedKeyHolder();
+			final String sql = "INSERT INTO " + UserLogin.TABLE_NAME + " ( " + UserLogin.USERNAME + ", " + UserLogin.PASSWORD + ", " + UserLogin.HINT_QUESTION
+							 + ", " + UserLogin.HINT_ANSWER + ", " + UserLogin.USER_TYPE_ID + ", " + UserLogin.CREATED_USER_ID 
+					         + ") VALUES (?, ?, ?, ?, ?, ? )";
+			
+		
+			if(developmentSettings.isShowSQL())
+				logger.info(sql);
+			
+
+			jdbcTemplate.update(new PreparedStatementCreator() {
+					
+			@Override
+			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+					PreparedStatement psObj = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+						psObj.setString(1, loginObj.getUsername());
+						psObj.setString(2, loginObj.getPassword());
+						psObj.setString(3, loginObj.getHintQuestion());
+						psObj.setString(4, loginObj.getHintAnswer());
+						psObj.setLong(5,loginObj.getUserTypeId());
+						if(createdUserId != null)
+							psObj.setLong(6, createdUserId);
+						else
+							psObj.setNull(6, Types.NULL);
+					return psObj;
+				}
+			}, keyHolder);
+		
+			
+			return keyHolder.getKey().longValue();
+			
+		}
+	
+	@Override
+	public boolean createAuthority(final Authorities authorityObj){
+		final String sql = "INSERT INTO " + Authorities.TABLE_NAME + " ( " + Authorities.USER_NAME + ", " + Authorities.AUTHORITY 
+							+ ") VALUES (?, ? )";
+
+			if(developmentSettings.isShowSQL())
+					logger.info(sql);
+
+			jdbcTemplate.update(new PreparedStatementCreator() {
+					
+			@Override
+			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+					PreparedStatement psObj = connection.prepareStatement(sql);
+						psObj.setString(1, authorityObj.getUserName());
+						psObj.setString(2, authorityObj.getAuthority());
+					return psObj;
+				}
+			});
+			
+			return true;
+	}
+	
+	@Override
+	public boolean updateAuthority(final Authorities authorityObj, final String newUserName){
+		try{
+			String sql = "UPDATE " + Authorities.TABLE_NAME + " SET " + Authorities.USER_NAME + " = ?  WHERE " + Authorities.USER_NAME + " = ?";
+			
+			if(developmentSettings.isShowSQL())
+				logger.info(sql);
+			
+			jdbcTemplate.update(sql, new PreparedStatementSetter() {
+				
+				@Override
+				public void setValues(PreparedStatement psObj) throws SQLException {
+					psObj.setString(1, newUserName);
+					psObj.setString(2, authorityObj.getUserName());
+				}
+			});
+			return true;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	@Override
+	public UserLogin findLoginUserByUserName(String username){
+		
+		String sql = "SELECT " + UserLogin.ID + ", " + UserLogin.USERNAME  + ", " + UserLogin.PASSWORD + ", " + UserLogin.HINT_QUESTION + ", " + UserLogin.HINT_ANSWER
+				 		+ ", " + UserLogin.HINT_QUESTION + ", " + UserLogin.HINT_ANSWER 
+				 		+ ", " + UserLogin.USER_TYPE_ID+ ", " + UserLogin.ENABLE + " FROM " + UserLogin.TABLE_NAME + " WHERE "  + UserLogin.USERNAME + " = '" + username + "' ; ";
+		
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+		
+		List<UserLogin> userList = jdbcTemplate.query(sql, new RowMapper<UserLogin>() {
+				@Override
+				public UserLogin mapRow(ResultSet rst, int arg1) throws SQLException {
+					UserLogin obj = new UserLogin();
+						obj.setId(rst.getLong(UserLogin.ID));
+						obj.setUsername(rst.getString(UserLogin.USERNAME));
+						obj.setPassword(rst.getString(UserLogin.PASSWORD));
+						obj.setUserTypeId(rst.getInt(UserLogin.USER_TYPE_ID));
+						obj.setHintQuestion(rst.getString(UserLogin.HINT_QUESTION));
+						obj.setHintAnswer(rst.getString(UserLogin.HINT_ANSWER));
+						obj.setEnable(rst.getBoolean(UserLogin.ENABLE));
+				return obj;
+				}
+			});
+			
+			if(userList != null && userList.size() != 0)
+				return userList.get(0);
+			else 
+				return null;
+	}
+
+	@Override
+	public List<UserLogin> loadAllLoginUser(Integer start, Integer limit) {
+		
+		return null;
+	}
+	
+	@Override
+	public boolean updatePassowrd(final EditPassword passwordObj) {
+		try{
+			String sql = "UPDATE " + UserLogin.TABLE_NAME + " SET " + UserLogin.PASSWORD + " = ? ";
+			
+			if(passwordObj.getUsername() != null && passwordObj.getUsername().length() > 0){
+				sql += ", " + UserLogin.USERNAME + " = '" + passwordObj.getUsername() + "'";
+			}
+			
+			sql += " WHERE " + UserLogin.ID + " = ?";
+			
+			if(developmentSettings.isShowSQL())
+				logger.info(sql);
+			
+			jdbcTemplate.update(sql, new PreparedStatementSetter() {
+				
+				@Override
+				public void setValues(PreparedStatement psObj) throws SQLException {
+					psObj.setString(1, passwordObj.getNewPassword());
+					psObj.setLong(2, passwordObj.getId());
+				}
+			});
+			return true;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+	}
+
+	@Override
+	public void enableUser(final Long userId, final Long modifierUserId){
+		
+		System.out.println("user Id : " + userId);
+		
+		final String sql = "UPDATE " + UserLogin.TABLE_NAME + " SET " + UserLogin.ENABLE + " = 1, "
+		           + UserLogin.MODIFIED_ON + " =CURRENT_TIMESTAMP, " + UserLogin.MODIFIED_USER_ID + " = ? "
+		           + " WHERE " + UserLogin.ID + " = ?";
+
+
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+
+		int status = jdbcTemplate.update(sql, new PreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement psObj) throws SQLException {
+				psObj.setLong(1, modifierUserId);
+				psObj.setLong(2, userId);
+			}
+		});
+		
+		if(status > 0)
+			logger.info("UPDATED Successfully.");
+		else
+			logger.info("Some Error Occurred.");
+			
+	}
+	
+	@Override
+	public void disableUser(final Long userId, final Long modifierUserId){
+		final String sql = "UPDATE " + UserLogin.TABLE_NAME + " SET " + UserLogin.ENABLE + " = 0, "
+		           + UserLogin.MODIFIED_ON + " =CURRENT_TIMESTAMP, " + UserLogin.MODIFIED_USER_ID + " = ? "
+		           + " WHERE " + UserLogin.ID + " = ?";
+
+
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+
+		int status = jdbcTemplate.update(sql, new PreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement psObj) throws SQLException {
+				psObj.setLong(1, modifierUserId);
+				psObj.setLong(2, userId);
+			}
+		});
+		
+		if(status > 0)
+			logger.info("UPDATED Successfully.");
+		else
+			logger.info("Some Error Occurred.");
+	}
+	
+
+	@Override
+	public UserLogin findLoginUserById(Long id) {
+		
+		String sql = "SELECT " + UserLogin.ID + ", " + UserLogin.USERNAME  + ", " + UserLogin.PASSWORD + ", " + UserLogin.HINT_QUESTION + ", " + UserLogin.HINT_ANSWER
+				 		+ ", " + UserLogin.HINT_QUESTION + ", " + UserLogin.HINT_ANSWER 
+				 		+ ", " + UserLogin.USER_TYPE_ID+ ", " + UserLogin.ENABLE + " FROM " + UserLogin.TABLE_NAME + " WHERE "  + UserLogin.ID + " = " + id;
+		
+		try {
+			List<UserLogin> userList = jdbcTemplate.query(sql, new RowMapper<UserLogin>() {
+
+				@Override
+				public UserLogin mapRow(ResultSet rst, int arg1) throws SQLException {
+					UserLogin obj = new UserLogin();
+						obj.setId(rst.getLong(UserLogin.ID));
+						obj.setUsername(rst.getString(UserLogin.USERNAME));
+						obj.setPassword(rst.getString(UserLogin.PASSWORD));
+						obj.setUserTypeId(rst.getInt(UserLogin.USER_TYPE_ID));
+						obj.setHintQuestion(rst.getString(UserLogin.HINT_QUESTION));
+						obj.setHintAnswer(rst.getString(UserLogin.HINT_ANSWER));
+						obj.setEnable(rst.getBoolean(UserLogin.ENABLE));
+				return obj;
+				}
+			});
+			
+			if(userList != null && userList.size() != 0)
+				return userList.get(0);
+			else 
+				return null;
+		}catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public List<UserLogin> searchLoginUser(String[] fieldNames, String[] values, String[] condition) {
+		
+		return null;
+	}
+
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	public DevelopmentSettings getDevelopmentSettings() {
+		return developmentSettings;
+	}
+
+	public void setDevelopmentSettings(DevelopmentSettings developmentSettings) {
+		this.developmentSettings = developmentSettings;
+	}
+
+	@Override
+	public boolean deleteLoginUser(Long landLordObjId) {
+		String sql = "DELETE FROM " + UserLogin.TABLE_NAME + " WHERE " + UserLogin.ID + "=" + landLordObjId;
+		if(developmentSettings.isShowSQL()){
+			logger.info(sql);
+		}
+		if(landLordObjId!=null){
+			try{
+			jdbcTemplate.update(sql);
+			}catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean validateUser(String userName) {
+		String sql = "SELECT * FROM " + UserLogin.TABLE_NAME + " WHERE " + UserLogin.USERNAME + " = '" + userName +"'";
+		if(developmentSettings.isShowSQL()){
+			logger.info(sql);
+		}
+		List<String> stringList = jdbcTemplate.query(sql, new RowMapper<String>(){
+
+			String str = null;
+			@Override
+			public String mapRow(ResultSet rst, int arg1) throws SQLException {
+				str = rst.getString(UserLogin.USERNAME);
+				return str;
+			}
+		});
+		if(stringList == null || stringList.isEmpty())
+			return true;
+		else{
+			return false;
+		}
+	}
+
+	
+}

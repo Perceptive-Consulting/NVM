@@ -1,0 +1,685 @@
+package com.pcs.perpetualRents.web.controller;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pcs.perpetualRents.business.bean.Address;
+import com.pcs.perpetualRents.business.bean.Charity;
+import com.pcs.perpetualRents.business.bean.Conversation;
+import com.pcs.perpetualRents.business.bean.EditPassword;
+import com.pcs.perpetualRents.business.bean.File;
+import com.pcs.perpetualRents.business.bean.Mail;
+import com.pcs.perpetualRents.business.bean.PDDocuments;
+import com.pcs.perpetualRents.business.bean.PDProperty;
+import com.pcs.perpetualRents.business.bean.PropertyDeveloper;
+import com.pcs.perpetualRents.business.bean.PropertyDocumentDownloadStatus;
+import com.pcs.perpetualRents.business.bean.UserLogin;
+import com.pcs.perpetualRents.enm.DocumentType;
+import com.pcs.perpetualRents.enm.ObjectType;
+import com.pcs.perpetualRents.enm.PropertyType;
+import com.pcs.perpetualRents.manager.AssignManager;
+import com.pcs.perpetualRents.manager.ContractorManager;
+import com.pcs.perpetualRents.manager.ConversationManager;
+import com.pcs.perpetualRents.manager.FileManager;
+import com.pcs.perpetualRents.manager.MailManager;
+import com.pcs.perpetualRents.manager.PMCManager;
+import com.pcs.perpetualRents.manager.PropertyDeveloperManager;
+import com.pcs.perpetualRents.manager.UserLoginManager;
+import com.pcs.perpetualRents.web.delegates.AjaxJSONDelegate;
+
+@Controller
+public class PropertyDeveloperController {
+	@Autowired
+	private PropertyDeveloperManager propertyDeveloperManager;
+	@Autowired
+	private ContractorManager contractorManager;
+	@Autowired
+	private AjaxJSONDelegate JSONDelegates;
+	@Autowired
+	private UserLoginManager loginManager;
+	@Autowired
+	private MailManager mailManager;
+	@Autowired
+	private ConversationManager conversationManager;
+	@Autowired
+	private AssignManager assignManager;
+	@Autowired
+	private PMCManager pmcManager;
+	@Autowired
+	private FileManager fileManager;
+	
+	private HttpSession sessionObj;
+	private UserLogin loginObj;
+	private PropertyDeveloper propertyDeveloperObj;
+	private ObjectMapper mapper = new ObjectMapper();
+	private boolean execStatus;
+	private PDProperty pdPropertyObj;
+	
+	@RequestMapping("propertyDeveloper/success")
+	public ModelAndView success(){
+		
+		return new ModelAndView("user/propertyDeveloper/success");
+	}
+	
+	@RequestMapping("propertyDeveloper/loadProfile")
+	public void loadProfile(HttpServletRequest request, HttpServletResponse response) throws JSONException{
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		JSONObject jObj = new JSONObject();
+		if(loginObj != null){
+			PropertyDeveloper propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+			if(propertyDeveloperObj != null){
+				JSONObject _jObj = new JSONObject();
+					_jObj.put("propertyDeveloper", propertyDeveloperObj.toJSON(true));
+					if(propertyDeveloperObj.getAddressObj() != null)
+						_jObj.put("address", propertyDeveloperObj.getAddressObj().toJSON(true));
+					if(propertyDeveloperObj.getLoginObj() != null)
+						_jObj.put("login", propertyDeveloperObj.getLoginObj().toJSON(true));
+					
+				jObj.put("data", _jObj);
+				jObj.put("success", true);
+				System.out.println(jObj.toString());
+			}
+		}
+		 JSONDelegates.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("propertyDeveloper/updateProfile")
+	public void updateProfile(HttpServletRequest request, HttpServletResponse response) throws JSONException, JsonParseException, JsonMappingException, IOException{
+		 sessionObj = request.getSession(false);
+		 loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		 propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+		 JSONObject jObj = new JSONObject();
+		 PropertyDeveloper tPropertyDeveloperObj = mapper.readValue(request.getInputStream(), PropertyDeveloper.class);
+		if(propertyDeveloperObj != null){
+			tPropertyDeveloperObj.setId(propertyDeveloperObj.getId());
+			execStatus = propertyDeveloperManager.updatePropertyDeveloper(tPropertyDeveloperObj, loginObj.getId());
+			if(execStatus){
+				sessionObj.setAttribute("loginObj", loginObj);
+				jObj.put("success", true);
+				jObj.put("message", "Your profile has been successfully updated.");
+			}else{
+				jObj.put("success", false);
+				jObj.put("message", tPropertyDeveloperObj.getErrorMessage());
+			}
+		}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("propertyDeveloper/updatePassword")
+	public void updatePassword(HttpServletRequest request, HttpServletResponse response) throws JsonParseException, JsonMappingException, IOException, JSONException{
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		loginObj = loginManager.findLoginUserByName(loginObj.getUsername());
+		
+		EditPassword pwdObj = mapper.readValue(request.getInputStream(), EditPassword.class);
+		JSONObject jObj = new JSONObject();
+		if(pwdObj != null){
+			pwdObj.setId(loginObj.getId());
+			if(pwdObj.getCurrentPassword() == null || pwdObj.getCurrentPassword() == ""){
+				jObj.put("success", false);
+				jObj.put("message", "Current Password Cannot be blank.");
+			}else if(pwdObj.getCurrentPassword() == null || !loginObj.getPassword().equalsIgnoreCase(pwdObj.getCurrentPassword())){
+				jObj.put("success", false);
+				jObj.put("message", "Invalid Current Password");
+			}else if(pwdObj.getNewPassword() == null || pwdObj.getNewPassword() == ""){
+				jObj.put("success", false);
+				jObj.put("message", "New Password cannot be blank.");
+			}else if(pwdObj.getConfirmPassword() == null || pwdObj.getConfirmPassword() == ""){
+				jObj.put("success", false);
+				jObj.put("message", "Confirm Password Cannot be blank.");
+			}else if(!pwdObj.getNewPassword().equalsIgnoreCase(pwdObj.getConfirmPassword())){
+				jObj.put("success", false);
+				jObj.put("message", "Confirm Password doesnot match.");
+			}
+			else{
+				execStatus = loginManager.updatePassword(pwdObj);
+				if(execStatus){
+					sessionObj.setAttribute("loginObj", loginObj);
+					jObj.put("message", "Password has been successfully updated");
+					jObj.put("success", true);
+				}else{
+					jObj.put("message", "Failed to update password");
+					jObj.put("success", false);
+				}
+			}
+		}else{
+			jObj.put("success", false);
+			jObj.put("message", "Current Password cannot be blank.");
+		}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping("propertyDeveloper/savePDProperty")
+	public void savePDProperty(HttpServletRequest request, HttpServletResponse response) throws JsonParseException, JsonMappingException, IOException, JSONException{
+		System.out.println("saved--- property/savePDProperty controller");
+		JSONObject jObj = new JSONObject();
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		pdPropertyObj = mapper.readValue(request.getInputStream(), PDProperty.class);
+		System.out.println(pdPropertyObj +"pdproperty Obj");
+		if(pdPropertyObj != null){
+			propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+			if(propertyDeveloperObj != null){
+				pdPropertyObj.setPropertyDeveloperId(propertyDeveloperObj.getId());
+				execStatus = propertyDeveloperManager.saveProperty(pdPropertyObj, loginObj.getId());
+				Set<Long> createpropertySet = null;
+				if(execStatus){
+				propertyDeveloperManager.updateDocStatus(PropertyDocumentDownloadStatus.TABLE_NAME, new String[]{PropertyDocumentDownloadStatus.PROPERTY_ID},
+							new String[]{""+pdPropertyObj.getId()}, new String[]{PropertyDocumentDownloadStatus.OBJECT_TYPE_ID, PropertyDocumentDownloadStatus.OBJECT_ID}, new String[]{""+ObjectType.LANDLORD.id() , ""+propertyDeveloperObj.getId()});
+					//createpropertySet = (Set<Long>) sessionObj.getAttribute("createpropertySet");
+					//if(createpropertySet == null){
+					//	createpropertySet = new HashSet<Long>();
+					//	createpropertySet.add(pdPropertyObj.getId());
+						//sessionObj.setAttribute("createpropertySet", createpropertySet);
+					//}else{
+					//	createpropertySet.add(pdPropertyObj.getId());
+					//	sessionObj.setAttribute("createpropertySet", createpropertySet);
+					//}
+					sessionObj.setAttribute("propertyId", pdPropertyObj.getId());
+					jObj.put("success", true);
+					jObj.put("message", "PropertyDeveloper Details has been successfully saved.");
+				}else{
+					jObj.put("success", false);
+					jObj.put("message", "Error occurred.");
+				}
+			
+			}
+		}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("propertyDeveloper/uploadDocuments")
+	public ModelAndView uploadDocuments(HttpServletRequest request, HttpServletResponse response){
+		PDProperty propertyObj = null;
+		String addOrUpdateCheck;
+		sessionObj = request.getSession(false);
+		if(sessionObj != null){
+		Long propertyId = (Long) sessionObj.getAttribute("propertyId");
+		UserLogin loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		PropertyDeveloper propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+		String param = request.getParameter("param");
+		
+		if(propertyId != null && propertyDeveloperObj != null && loginObj != null){
+			MultipartHttpServletRequest multiPartRequest = null;
+			try{
+				System.out.println("inside controller...  uploadDocuments------------- ");
+				if(request instanceof MultipartHttpServletRequest)
+					multiPartRequest = (MultipartHttpServletRequest) request;
+				
+				File fileObj = null;
+				propertyObj = propertyDeveloperManager.loadPDPropertyById(propertyId);
+				if(propertyObj != null){
+					List<PDDocuments>  documentsList = new ArrayList<PDDocuments>();
+					if(multiPartRequest != null){
+						List<MultipartFile> files = multiPartRequest.getFiles("attachFiles");
+						if(files != null && !files.isEmpty()){
+							for (MultipartFile multipartFile : files) {
+								if(multipartFile != null){
+									if(multipartFile.getOriginalFilename() != null && multipartFile.getOriginalFilename().length() != 0){
+										fileObj = new File(multipartFile.getOriginalFilename(), multipartFile.getSize(), 0, propertyId, multipartFile.getBytes(), multipartFile.getContentType(), DocumentType.IMAGES.id());
+										if(fileObj != null){
+											fileObj.setPropertyReference(propertyObj.getUniqueReference());
+											if(param != null){
+											PDDocuments documents = new PDDocuments(propertyDeveloperObj.getId(), propertyId, Long.valueOf(param), multipartFile.getOriginalFilename(), fileObj);
+											documentsList.add(documents);
+											}
+										}
+									}
+								}
+							}
+							if(propertyObj.getCheckForUploadDocuments() != null && propertyObj.getCheckForUploadDocuments().equals("1")){
+								addOrUpdateCheck = "2";        // 1 for add &  2 for update,  here file/s already exists
+								System.out.println("setting addOrUpdateCheck =  ::  " +2 );
+								System.out.println("222222222222222222222222222222222222222222 : "+propertyObj.getCheckForUploadDocuments());
+							}else{
+								System.out.println("setting addOrUpdateCheck =  ::  " +1 );
+								System.out.println("11111111111111111111111111111111111111111111111111 : "+propertyObj.getCheckForUploadDocuments());
+								addOrUpdateCheck = "1";      // getCheckForUploadDocuments could be NULL for new upload
+							}
+							 
+							execStatus = propertyDeveloperManager.saveDocuments(documentsList, loginObj.getId(), propertyObj, addOrUpdateCheck );
+							 propertyObj = propertyDeveloperManager.loadPDPropertyById(propertyId); 
+							if(execStatus){
+							//	propertyDeveloperManager.loadPropertyDocuments(propertyDeveloperObj.getId(), propertyObj, loginObj.getId());
+								//  for edit
+									if(propertyObj.getCheckForUploadDocuments()!= null && propertyObj.getCheckForUploadDocuments().equals("1")){
+										sessionObj.setAttribute("uploadPdDocuments",true);
+										sessionObj.setAttribute("editingPDDocument",false);	
+									}
+									else{
+										sessionObj.setAttribute("uploadPdDocuments",false);
+										 sessionObj.setAttribute("editingPDDocument",true);
+									}
+								
+									return new ModelAndView("redirect:uploadPropertyFiles");
+							}
+						}
+					}
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+				return new ModelAndView("user/propertyDeveloper/pdProperty/uploadPropertyFiles");
+			}
+		 }
+		}
+		return new ModelAndView("redirect:uploadPropertyFiles");
+	}
+	
+	
+	
+	@RequestMapping("propertyDeveloper/startPropertyDeveloperConversation")
+	public void startPropertyDeveloperConversation(HttpServletRequest request, HttpServletResponse response) throws JsonParseException, JsonMappingException, IOException, JSONException{
+		JSONObject jObj = new JSONObject();
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		if(loginObj != null){
+			String pdPropertyId = request.getParameter("PDId");
+			Mail mailObj = mapper.readValue(request.getInputStream(), Mail.class);
+			if(pdPropertyId != null){
+				Charity charity = pmcManager.loadCharityByUserLogin(loginObj);
+				if(charity != null){
+					Long conversationId = mailManager.createPropertyDeveloperConversation(mailObj, charity, loginObj, Long.valueOf(pdPropertyId));
+					if(conversationId != null){
+						jObj.put("data", conversationId);
+						jObj.put("success", true);
+					}else{
+						jObj.put("success", false);
+					}
+				}
+			}
+		}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("propertyDeveloper/loadPMCConversationByProperty")
+	public void loadPMCConversationByProperty(HttpServletRequest request, HttpServletResponse response) throws JSONException{
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		String propId = request.getParameter("PDId");
+		JSONObject jObj = new JSONObject();
+		 JSONArray jArray = new JSONArray();
+		
+		Long pdPropertyId = null;
+		if(propId != null){
+			pdPropertyId = Long.valueOf(propId.trim());
+			sessionObj.setAttribute("pdPropertyId", pdPropertyId);
+		}else{
+			pdPropertyId = (Long) sessionObj.getAttribute("pdPropertyId");
+		}
+		
+		PropertyDeveloper tPropertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+		if(pdPropertyId != null && tPropertyDeveloperObj != null){
+		List<Conversation> tlconversation = conversationManager.loadConversationByActorTwo(tPropertyDeveloperObj.getId(), ObjectType.PROPERTY_DEVELOPER.id(), pdPropertyId, PropertyType.PROPOSED_DEVELOPMENT.id());
+		if(tlconversation != null){
+			for (Conversation tConversationObj : tlconversation) {
+				Charity tCharityObj = pmcManager.loadPMCById(tConversationObj.getActorOneId());
+				tConversationObj.setActorOneDetailsStr(tCharityObj.getCompanyName());
+				jArray.put(new JSONObject().put("conversationObj", tConversationObj.toJSON(true)));
+			}
+			jObj.put("success", true);
+			jObj.put("data", jArray);
+		}else{
+			jObj.put("success", false);
+		}
+	}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	/*-----------------------------------------------------------------------------*/
+	
+	
+	@RequestMapping("propertyDeveloper/redirectConversation")
+	public ModelAndView redirectConversation(HttpServletRequest request, HttpServletResponse response){
+		sessionObj = request.getSession(false);
+		String propId = request.getParameter("pdPropertyId");
+		if(propId != null){
+			sessionObj.setAttribute("pdPropertyId", Long.valueOf(propId.trim()));
+		}
+		return new ModelAndView("user/propertyDeveloper/pdProperty/pdPropertyConversation");
+	}
+	
+	@RequestMapping("propertyDeveloper/redirectCompleteProfile")  // complete Profile
+	public ModelAndView redirectCompleteProfile(){
+		return new ModelAndView("user/propertyDeveloper/completeProfile/propertyDeveloperProfile");
+	}
+	
+	@RequestMapping("propertyDeveloper/redirectCompleteEditProfile")   // edit profile
+	public ModelAndView redirectCompleteEditProfile(){
+		return new ModelAndView("user/propertyDeveloper/completeProfile/editPropertyDeveloperProfile");
+	}
+	
+	
+	@RequestMapping("propertyDeveloper/redirectCompleteChangePassword")  // changePassword
+	public ModelAndView redirectCompleteChangePassword(){
+		return new ModelAndView("user/propertyDeveloper/completeProfile/changePropertyDeveloperPassword");
+	}// 
+	
+	@RequestMapping("propertyDeveloper/redirectCompleteProperties")      // view all properties
+	public ModelAndView redirectCompleteProperties(){
+		return new ModelAndView("user/propertyDeveloper/completeProfile/pdPropertyList");
+	}
+	
+	@RequestMapping("propertyDeveloper/registerNewpdProperty")          // not used
+	public ModelAndView registerNewpdProperty(){
+		return new ModelAndView("user/propertyDeveloper/completeProfile/registerPropertyPD");
+	}
+	
+	@RequestMapping("propertyDeveloper/proceed")         		 // register PropertyDetails
+	public ModelAndView proceed(){
+		return new ModelAndView("user/propertyDeveloper/pdProperty/savePDPropertyDetails");    
+	}
+	
+	@RequestMapping("propertyDeveloper/uploadPropertyFiles")         		 // register PropertyDetails
+	public ModelAndView uploadPropertyFiles(HttpServletRequest request){
+		sessionObj = request.getSession(false);
+		if(sessionObj != null){
+			UserLogin loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+			PropertyDeveloper propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+			Long pdPropertyId = (Long) sessionObj.getAttribute("propertyId");
+			if(propertyDeveloperObj != null && pdPropertyId != null){
+				PDProperty pdProperty = propertyDeveloperManager.loadPDPropertyById(pdPropertyId);
+				if(pdProperty != null){
+					ModelAndView mv = new ModelAndView("user/propertyDeveloper/pdProperty/uploadPropertyFiles");
+					propertyDeveloperManager.loadPropertyDocuments(propertyDeveloperObj.getId(), pdProperty, loginObj.getId());
+					mv.addObject("property", pdProperty);
+					
+					return mv;
+				}
+			}
+		}
+		return new ModelAndView("user/propertyDeveloper/pdProperty/uploadPropertyFiles");
+	}
+	
+	@RequestMapping("propertyDeveloper/removeDocuments")
+	public ModelAndView removeDocuments(HttpServletRequest request, HttpServletResponse response){
+		String docId = request.getParameter("docId");
+		if(docId != null){System.out.println("docId--------  "+docId);
+			propertyDeveloperManager.removeDocuments(Long.valueOf(docId));
+		}
+		return new ModelAndView("redirect:uploadPropertyFiles");
+	}
+	
+	/*---------------------------*/
+	@RequestMapping("propertyDeveloper/redirectPropertyDeveloperProfile")
+	public ModelAndView redirectPropertyDeveloperProfile(){
+		return new ModelAndView("user/propertyDeveloper/propertyDeveloperDetail");
+	}
+	
+	
+	@RequestMapping("propertyDeveloper/registerNewProperty")
+	public ModelAndView registerNewProperty(){
+		return new ModelAndView("user/propertyDeveloper/completeProfile/registerPropertyPD");
+	}
+
+	@RequestMapping("propertyDeveloper/loadAllProperty")
+	public void loadAllProperty(HttpServletRequest request, HttpServletResponse response) throws JSONException{
+		System.out.println("inside propertyDeveloper  controller --- 1");
+		sessionObj = request.getSession(false);
+		loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+		JSONObject jObj = new JSONObject();
+		JSONArray jArray = new JSONArray();
+		if(propertyDeveloperObj != null){
+			List<PDProperty> propList = propertyDeveloperManager.loadPropertyByPropertyDeveloper(propertyDeveloperObj);
+			if(propList != null && !propList.isEmpty()){
+				JSONObject _jObj = null;
+				for (PDProperty _propObj : propList) {
+					_jObj = new JSONObject();
+					_jObj.put("property", _propObj.toJSON(true));
+					_jObj.put("viewAdminDocs", propertyDeveloperManager.checkAdminUploadDocument(_propObj.getId()));
+					
+					Address tAddressObj = _propObj.getAddressObj();
+					if(tAddressObj != null)
+						_jObj.put("address", tAddressObj.toJSON(false));
+						
+					propertyDeveloperManager.loadPropertyDocuments(propertyDeveloperObj.getId(), _propObj, loginObj.getId());
+						List<PDDocuments> imagesList = _propObj.getImages();
+						
+						if(imagesList != null){
+							JSONArray _jArr = new JSONArray();
+							for (PDDocuments tFileObj : imagesList) 
+								_jArr.put(tFileObj.getFilePath());
+							_jObj.put("files", _jArr);
+						}
+					jArray.put(_jObj);
+				}
+				jObj.put("data", jArray);
+				jObj.put("success", true);
+			}else{
+				jObj.put("success", false);
+			}
+		}else{
+			jObj.put("success", false);
+		}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("propertyDeveloper/fetchProperty")
+	public void fetchProperty(HttpServletRequest request, HttpServletResponse response) throws JSONException{
+		
+		PDProperty pdPropertyObj;
+		JSONObject jObj = new JSONObject();
+		String propId  = request.getParameter("propertyId"); 
+		System.out.println("propertyID is:: "+propId);
+			Long propertyId = Long.valueOf(propId);
+			sessionObj.setAttribute("propertyId", propertyId);
+			sessionObj.setAttribute("flag", true);
+		if(propertyId != null){
+			pdPropertyObj = propertyDeveloperManager.loadPDPropertyById(propertyId);
+			if(pdPropertyObj != null){
+				JSONObject _jObj = new JSONObject();
+					_jObj.put("property", pdPropertyObj.toJSON(true));
+					
+					Address addressObj = pdPropertyObj.getAddressObj();
+					if(addressObj != null){
+						_jObj.put("address", addressObj.toJSON(true));
+					}
+					boolean flag = (Boolean) sessionObj.getAttribute("flag");
+					if(flag)
+						jObj.put("flag", flag);
+					else
+						jObj.put("flag", false);
+					
+				jObj.put("success", true);
+				jObj.put("data", _jObj);
+			}else{
+				jObj.put("success", false);
+			}
+		}
+		JSONDelegates.setResponse(jObj, response);
+
+	}
+	
+
+	@RequestMapping("propertyDeveloper/getPDPropertyView")
+	public ModelAndView getPDPropertyView(HttpServletRequest request, HttpServletResponse response){
+		System.out.println("returning view");
+		return new ModelAndView("user/propertyDeveloper/pdProperty/savePDPropertyDetails.jsp");
+	}
+	
+	
+	@RequestMapping("propertyDeveloper/updateProperty")
+	public void updateProperty(HttpServletRequest request, HttpServletResponse response) throws JsonParseException, JsonMappingException, IOException, JSONException{
+		
+		sessionObj = request.getSession(false);
+		 loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		 propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+		 JSONObject jObj = new JSONObject();
+		 PDProperty tPDPropertyObj = mapper.readValue(request.getInputStream(), PDProperty.class);
+		Long propId =  (Long) sessionObj.getAttribute("propertyId");
+		if(propId != null){
+			tPDPropertyObj.setId(propId);
+			if(propertyDeveloperObj != null){
+				execStatus = propertyDeveloperManager.updatePropertyDetils(tPDPropertyObj, loginObj.getId());
+				if(execStatus){
+					sessionObj.setAttribute("loginObj", loginObj);
+					jObj.put("success", true);
+					jObj.put("message", "Your profile has been successfully updated.");
+				}else{
+					jObj.put("success", false);
+					jObj.put("message", " Profile not Updated...");
+				}
+			}
+		}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	
+	
+	@RequestMapping("propertyDeveloper/redirectPropertyDeveloperDocuments")
+	public ModelAndView redirectPropertyDeveloperDocuments(HttpServletRequest request , HttpServletResponse response){
+		return new ModelAndView("");
+	}
+	
+	@RequestMapping("propertyDeveloper/savePropertyDetailsDescription")
+	public ModelAndView savePropertyDetailsDescription(HttpServletRequest request , HttpServletResponse response){
+		return new ModelAndView("user/propertyDeveloper/detailedRegistrationPropertyDeveloper");
+	}
+	
+	@RequestMapping("propertyDeveloper/savePDPropertySecondDetail")
+	public void savePDPropertySecondDetail(HttpServletRequest request , HttpServletResponse response) throws JSONException, JsonParseException, JsonMappingException, IOException{
+		sessionObj = request.getSession(false);
+		 loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		 propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+		 JSONObject jObj = new JSONObject();
+		 PDProperty tPDPropertyObj = mapper.readValue(request.getInputStream(), PDProperty.class);
+		Long propId =  (Long) sessionObj.getAttribute("propertyId");
+		if(propId != null){
+			tPDPropertyObj.setId(propId);
+			if(propertyDeveloperObj != null){
+				execStatus = propertyDeveloperManager.savePropertyDetilsSecond(tPDPropertyObj, loginObj.getId());
+				if(execStatus){
+					sessionObj.setAttribute("loginObj", loginObj);
+					jObj.put("success", true);
+					jObj.put("message", "PropertyDeveloper Details has been successfully saved.");
+				}else{
+					jObj.put("success", false);
+					jObj.put("message", " Profile not Saved...");
+				}
+			}
+		}
+		JSONDelegates.setResponse(jObj, response);	
+	}
+	
+	
+	@RequestMapping("propertyDeveloper/gotoUpdatePDPropertySecond")
+	public ModelAndView gotoUpdatePDPropertySecond(HttpServletRequest request, HttpServletResponse response){
+		
+		Long pdPropertyId = (Long) sessionObj.getAttribute("propertyId");
+		if(propertyDeveloperObj != null && pdPropertyId != null){
+			PDProperty pdProperty = propertyDeveloperManager.loadPDPropertyById(pdPropertyId);
+			if(pdProperty != null){
+				ModelAndView mv = new ModelAndView("user/propertyDeveloper/detailedRegistrationPropertyDeveloper");
+				propertyDeveloperManager.loadPropertyDocuments(propertyDeveloperObj.getId(), pdProperty, loginObj.getId());
+				mv.addObject("propertyObj", pdProperty);
+				System.out.println(" full Property  :: " +pdProperty);
+				return mv;
+			}
+		}
+		return new ModelAndView("user/propertyDeveloper/detailedRegistrationPropertyDeveloper");
+	}
+	
+	
+	
+	@RequestMapping("propertyDeveloper/updatePropertyDetailsSecond")
+    public void updatePropertyDetailsSecond(HttpServletRequest request, HttpServletResponse response) throws JsonParseException, JsonMappingException, IOException, JSONException{
+		
+		sessionObj = request.getSession(false);
+		 loginObj = (UserLogin) sessionObj.getAttribute("loginObj");
+		 propertyDeveloperObj = propertyDeveloperManager.loadPropertyDeveloperByUserLogin(loginObj);
+		 JSONObject jObj = new JSONObject();
+		 PDProperty tPDPropertyObj = mapper.readValue(request.getInputStream(), PDProperty.class);
+		Long propId =  (Long) sessionObj.getAttribute("propertyId");
+		if(propId != null){
+			tPDPropertyObj.setId(propId);
+			if(propertyDeveloperObj != null){
+				execStatus = propertyDeveloperManager.savePropertyDetilsSecond(tPDPropertyObj, loginObj.getId());
+				if(execStatus){
+					sessionObj.setAttribute("loginObj", loginObj);
+					jObj.put("success", true);
+					jObj.put("message", "Your profile has been successfully updated.");
+				}else{
+					jObj.put("success", false);
+					jObj.put("message", " Profile not Updated...");
+				} 
+			}
+		}
+		JSONDelegates.setResponse(jObj, response);
+	}
+	
+	@RequestMapping("propertyDeveloper/viewAdminUploadedDocs")
+	public ModelAndView viewAdminUploadedDocs(HttpServletRequest request, HttpServletResponse response){
+		//String fileListAr = request.getParameter("fileList");
+		ModelAndView mv = new ModelAndView("user/propertyDeveloper/viewAdminUploadedDocs");
+		String propertyId = request.getParameter("propertyId");
+		List<PDDocuments> docList = propertyDeveloperManager.loadAdminUploadDocument(Long.valueOf(propertyId));
+		
+		mv.addObject("docList", docList);
+		
+		return mv;
+		
+	}
+	
+	@RequestMapping("propertyDeveloper/downAdminDocuments")
+	public void downAdminDocuments(HttpServletRequest request, HttpServletResponse response){               // method to download file
+		String documentId = request.getParameter("documentId");
+		System.out.println();
+		if(documentId != null){
+			
+		// ;;;;;;;;;;;;;update status
+			boolean status = propertyDeveloperManager.changePDDocumentStatus(Long.valueOf(documentId));
+			
+			
+			PDDocuments pdDocuments = propertyDeveloperManager.loadPDDocuments(Long.valueOf(documentId));
+			if(pdDocuments != null){
+				File fileObj = fileManager.loadFileById(Long.valueOf(pdDocuments.getFileId()));
+				if(fileObj != null){
+					try {
+						int length = (int)fileObj.getSize();
+						ServletOutputStream oStream = response.getOutputStream();
+				        response.setContentLength(length);
+				        String fileName = fileObj.getFileName();
+		
+				        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");     // fixed format to  download file
+				        
+				        byte[] byteBuffer = new byte[length];
+				        InputStream iStream = new ByteArrayInputStream(fileObj.getFileData());
+				        iStream.read(byteBuffer);
+				        oStream.write(byteBuffer,0,length);
+				        
+				        iStream.close();
+				        oStream.flush();
+				        oStream.close();
+				        
+					} catch (Exception e) {e.printStackTrace();}
+				}
+			}
+		}
+	}
+	
+}

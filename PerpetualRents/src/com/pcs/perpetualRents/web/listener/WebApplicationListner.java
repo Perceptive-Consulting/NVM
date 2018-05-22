@@ -1,0 +1,20 @@
+package com.pcs.perpetualRents.web.listener;
+
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.security.web.session.HttpSessionCreatedEvent;
+
+public class WebApplicationListner implements ApplicationListener<ApplicationEvent> {
+
+	@Override
+	public void onApplicationEvent(ApplicationEvent applicationEvent) {
+		
+		if(applicationEvent instanceof HttpSessionCreatedEvent){
+			
+			//HttpSessionCreatedEvent applicationEventObj = (HttpSessionCreatedEvent) applicationEvent;
+			
+		}
+		
+	}
+
+}

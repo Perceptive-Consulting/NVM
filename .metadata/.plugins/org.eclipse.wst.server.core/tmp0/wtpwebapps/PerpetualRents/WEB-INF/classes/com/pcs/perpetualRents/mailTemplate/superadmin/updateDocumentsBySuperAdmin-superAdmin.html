@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+ 
+        <p>Hi Super Admin <span th:text="${receiverName}"></span> ,</p>
+        
+        <p>You have successfully modified document/s  to  <span th:text="${propertyDeveloperName}"></span> at  <span th:text="${Address}"></span></p>
+    
+		<p>The property ID is <span th:text="${PropertyID}"></span></p>
+		
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			 	     		     
+    </body>   
+</html>

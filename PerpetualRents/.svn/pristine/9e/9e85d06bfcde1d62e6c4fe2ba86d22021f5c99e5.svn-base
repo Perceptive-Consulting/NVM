@@ -1,0 +1,268 @@
+package com.pcs.perpetualRents.dao.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.mysql.jdbc.Statement;
+import com.pcs.perpetualRents.business.bean.Contractor;
+import com.pcs.perpetualRents.business.bean.Admin;
+import com.pcs.perpetualRents.business.bean.UserLogin;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.common.bean.DevelopmentSettings;
+import com.pcs.perpetualRents.dao.UserAdminDAO;
+import com.pcs.perpetualRents.dao.mapper.UserAdminMapper;
+
+@Repository
+public class UserAdminDAOImpl implements UserAdminDAO {
+	
+	private static Logger logger = ApplicationSettings.getLogger(ContractorDAOImpl.class.getName());
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	@Autowired
+	private DevelopmentSettings developmentSettings;
+	
+	@Override
+	public Long createAdmin(final Admin userObj, final Long createdUserId) {
+		final String sql = "INSERT INTO " + Admin.TABLE_NAME + " ( " + Admin.FIRST_NAME + ", " + Admin.LAST_NAME + ", " + Admin.UNIQUE_REFERENCE
+					+ ", " + Admin.CREATED_USER_ID + ", " + Admin.USER_LOGIN_ID + " ) VALUES (?, ?, ?, ?, ?)";
+		
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		
+		jdbcTemplate.update(new PreparedStatementCreator() {
+			
+			@Override
+			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+				PreparedStatement psObj = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+					psObj.setString(1, userObj.getFirstName());
+					psObj.setString(2, userObj.getLastName());
+					psObj.setString(3, userObj.getUniqueReference());
+					psObj.setLong(4, createdUserId);
+					psObj.setLong(5, userObj.getLoginUserId());
+					
+				return psObj;
+			}
+		}, keyHolder);
+		
+		return keyHolder.getKey().longValue();
+	}
+
+	@Override
+	public List<Admin> loadAll(Integer start, Integer limit) {
+		
+		String sql = "SELECT ua." + Admin.ID + ", ua." + Admin.UNIQUE_REFERENCE + ", ua." + Admin.FIRST_NAME + ", ua." + Admin.LAST_NAME
+					+ ", ua." + Admin.CREATED_ON + ", ua." + Admin.MODIFIED_ON  + ", ua." + Admin.USER_LOGIN_ID 
+					+ ", x1." + UserLogin.USERNAME + ", x1." + UserLogin.PASSWORD + ", x1." + UserLogin.HINT_QUESTION + ", x1." + UserLogin.HINT_ANSWER
+					+ ", x1." + UserLogin.ENABLE
+					+ ", x2." + UserLogin.USERNAME + " AS " + Admin.CREATED_BY
+					+ ", x3." + UserLogin.USERNAME + " AS " + Admin.MODIFIED_BY 
+					+ " FROM " + Admin.TABLE_NAME + " ua " 
+					+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x1 ON ua." + Admin.USER_LOGIN_ID + " = " + " x1." + UserLogin.ID
+					+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x2 ON ua." + Admin.CREATED_USER_ID + " = " + " x2." + UserLogin.ID
+					+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x3 ON ua." + Contractor.MODIFIED_USER_ID + " = " + " x3." + UserLogin.ID
+					+ " ORDER BY ua." + Admin.CREATED_ON + " DESC";
+					
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+		
+		 List<Admin> adminList = jdbcTemplate.query(sql, new UserAdminMapper());
+		 if(adminList != null && !adminList.isEmpty())
+			 return adminList;
+		 
+		 return null;
+	}
+
+	@Override
+	public Admin loadAdminById(Long id , Boolean enable) {
+
+		String sql = "SELECT ua." + Admin.ID + ", ua." + Admin.UNIQUE_REFERENCE + ", ua." + Admin.FIRST_NAME + ", ua." + Admin.LAST_NAME
+				+ ", ua." + Admin.CREATED_ON + ", ua." + Admin.MODIFIED_ON + ", ua." + Admin.USER_LOGIN_ID 
+				+ ", x1." + UserLogin.USERNAME + ", x1." + UserLogin.PASSWORD + ", x1." + UserLogin.HINT_QUESTION + ", x1." + UserLogin.HINT_ANSWER
+				+ ", x1." + UserLogin.ENABLE
+				+ ", x2." + UserLogin.USERNAME + " AS " + Admin.CREATED_BY
+				+ ", x3." + UserLogin.USERNAME + " AS " + Admin.MODIFIED_BY 
+				+ " FROM " + Admin.TABLE_NAME + " ua " 
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x1 ON ua." + Admin.USER_LOGIN_ID + " = " + " x1." + UserLogin.ID
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x2 ON ua." + Admin.CREATED_USER_ID + " = " + " x2." + UserLogin.ID
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x3 ON ua." + Contractor.MODIFIED_USER_ID + " = " + " x3." + UserLogin.ID 
+				+ " WHERE ua." + Admin.ID + " = " + id;
+				if(enable != null){
+					sql += " AND  x1." + UserLogin.ENABLE + " = " + enable ;
+				}
+				
+					
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+		
+		 List<Admin> adminList = jdbcTemplate.query(sql, new UserAdminMapper());
+		 if(adminList != null && !adminList.isEmpty()){
+			 System.out.println(adminList.get(0).getId());
+			 return adminList.get(0);
+		 }
+		 
+		 return null;
+		
+	}
+
+	@Override
+	public List<Admin> search(String[] fieldNames, String[] values,
+			String[] condition) {
+		return null;
+	}
+
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	public DevelopmentSettings getDevelopmentSettings() {
+		return developmentSettings;
+	}
+
+	public void setDevelopmentSettings(DevelopmentSettings developmentSettings) {
+		this.developmentSettings = developmentSettings;
+	}
+
+	@Override
+	public boolean disableUser(Long userObjId) {
+		try{
+		String sql = "UPDATE " + Admin.TABLE_NAME + " SET " + Admin.ENABLE + " = " + 0 + " WHERE " + Admin.ID + " = " + userObjId;
+		if(developmentSettings.isShowSQL()){
+			logger.info(sql);
+		}
+		jdbcTemplate.update(sql);
+		return true;
+		}catch(Exception e){
+			e.printStackTrace();
+		return false;
+		}
+	}
+
+	@Override
+	public boolean enableUser(Long userObjId) {
+		try{
+			String sql = "UPDATE " + Admin.TABLE_NAME + " SET " + Admin.ENABLE + " = " + 1 + " WHERE " + Admin.ID + " = " + userObjId;
+			if(developmentSettings.isShowSQL()){
+				logger.info(sql);
+			}
+			jdbcTemplate.update(sql);
+			return true;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		return false;
+		}
+	}
+
+	@Override
+	public boolean updateUser(final Admin userObj, final Long modifiedUserId) {
+		try{
+			String sql = "UPDATE " + Admin.TABLE_NAME + " SET " + Admin.FIRST_NAME + " = ?, " + Admin.LAST_NAME + " = ?, "
+					+ Admin.MODIFIED_ON + " =CURRENT_TIMESTAMP, " + Admin.MODIFIED_USER_ID + " = ? "
+					+ " WHERE " + Admin.ID + " = ?";
+			if(developmentSettings.isShowSQL()){
+				logger.info(sql);
+			}
+			jdbcTemplate.update(sql, new PreparedStatementSetter() {
+				@Override
+				public void setValues(PreparedStatement psObj) throws SQLException {
+					psObj.setString(1 , userObj.getFirstName());
+					psObj.setString(2, userObj.getLastName());
+					psObj.setLong(3, modifiedUserId);
+					psObj.setLong(4, userObj.getId());
+				}
+			});
+			return true;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		return false;
+		}
+	}
+
+	@Override
+	public List<Admin> loadUsersByAdminId(Long loginId) {
+		String sql = "SELECT ua." + Admin.ID + ", ua." + Admin.UNIQUE_REFERENCE + ", ua." + Admin.FIRST_NAME + ", ua." + Admin.LAST_NAME
+				+ ", ua." + Admin.CREATED_ON + ", ua." + Admin.MODIFIED_ON + ", ua." + Admin.USER_LOGIN_ID 
+				+ ", x1." + UserLogin.USERNAME + ", x1." + UserLogin.PASSWORD + ", x1." + UserLogin.HINT_QUESTION + ", x1." + UserLogin.HINT_ANSWER
+				+ ", x1." + UserLogin.ENABLE
+				+ ", x2." + UserLogin.USERNAME + " AS " + Admin.CREATED_BY
+				+ ", x3." + UserLogin.USERNAME + " AS " + Admin.MODIFIED_BY 
+				+ " FROM " + Admin.TABLE_NAME + " ua " 
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x1 ON ua." + Admin.USER_LOGIN_ID + " = " + " x1." + UserLogin.ID
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x2 ON ua." + Admin.CREATED_USER_ID + " = " + " x2." + UserLogin.ID
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x3 ON ua." + Contractor.MODIFIED_USER_ID + " = " + " x3." + UserLogin.ID
+				+ " WHERE ua." + Admin.CREATED_USER_ID + " = " + loginId
+				+ " ORDER BY ua." + Admin.CREATED_ON + " DESC";
+				
+	if(developmentSettings.isShowSQL())
+		logger.info(sql);
+	
+	 List<Admin> adminList = jdbcTemplate.query(sql, new UserAdminMapper());
+	 if(adminList != null && !adminList.isEmpty())
+		 return adminList;
+	 
+	 return null;
+	}
+	
+	@Override
+	public Admin loadAdminByLoginObj(UserLogin loginObj) {
+
+		String sql = "SELECT ua." + Admin.ID + ", ua." + Admin.UNIQUE_REFERENCE + ", ua." + Admin.FIRST_NAME + ", ua." + Admin.LAST_NAME
+				+ ", ua." + Admin.CREATED_ON + ", ua." + Admin.MODIFIED_ON + ", ua." + Admin.USER_LOGIN_ID 
+				+ ", x1." + UserLogin.USERNAME + ", x1." + UserLogin.PASSWORD + ", x1." + UserLogin.HINT_QUESTION + ", x1." + UserLogin.HINT_ANSWER   
+				+ ", x1." + UserLogin.ENABLE
+				+ ", x2." + UserLogin.USERNAME + " AS " + Admin.CREATED_BY
+				+ ", x3." + UserLogin.USERNAME + " AS " + Admin.MODIFIED_BY 
+				+ " FROM " + Admin.TABLE_NAME + " ua " 
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x1 ON ua." + Admin.USER_LOGIN_ID + " = " + " x1." + UserLogin.ID
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x2 ON ua." + Admin.CREATED_USER_ID + " = " + " x2." + UserLogin.ID
+				+ " LEFT JOIN " + UserLogin.TABLE_NAME  + " x3 ON ua." + Contractor.MODIFIED_USER_ID + " = " + " x3." + UserLogin.ID 
+				+ " WHERE ua." + Admin.USER_LOGIN_ID + " = " + loginObj.getId();
+				
+		if(developmentSettings.isShowSQL())
+			logger.info(sql);
+		
+		 List<Admin> adminList = jdbcTemplate.query(sql, new UserAdminMapper());
+		 if(adminList != null && !adminList.isEmpty())
+			 return adminList.get(0);
+		 
+		 return null;
+	}
+
+	@Override
+	public String updatePassword(Admin userObj) {
+		String password = null;
+		String sql = "UPDATE " + UserLogin.TABLE_NAME + 
+				" SET " + UserLogin.PASSWORD +  " = '" + 
+					userObj.getLoginObj().getPassword() + "'"+
+					" WHERE " + UserLogin.ID + " = " + userObj.getLoginUserId();
+		if(developmentSettings.isShowSQL()){
+			logger.info(sql);
+		}
+			try{
+			jdbcTemplate.update(sql);
+			password = userObj.getLoginObj().getPassword();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		return password;
+	}
+	
+}

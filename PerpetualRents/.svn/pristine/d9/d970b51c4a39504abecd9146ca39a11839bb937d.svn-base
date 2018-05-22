@@ -1,0 +1,626 @@
+package com.pcs.perpetualRents.business.bean;
+
+import java.io.Serializable;
+import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.quartz.Job;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.itextpdf.text.pdf.PdfDocument;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.common.bean.BusinessObject;
+import com.pcs.perpetualRents.enm.Status;
+@JsonIgnoreProperties(ignoreUnknown=true)
+public class PDProperty extends BusinessObject implements Serializable{
+
+
+	private static final long serialVersionUID = 1L;
+	public static final String TABLE_NAME = "tbl_" + ApplicationSettings.APP_NAME + "_" + PDProperty.class.getSimpleName().toLowerCase();
+	
+	
+	public static final String CONTACT_PERSON = "contactPerson";
+	public static final String UNIQUE_REFERENCE = "uniqueReference";
+	public static final String PROPERTYDEVELOPER_ID = "propertydeveloperId";
+	public static final String ENABLE = "enable";
+	public static final String STATUS_ID = "statusId";
+	public static final String TYPE_OF_PROPOSED_PROPERTY = "typeOfProposedProp";
+	public static final String NUMBER_OF_UNITS = "noOfUnits";
+	public static final String ENERGY_SAVING_FEATURES = "energySavingFeatures";
+	public static final String ESTIMATED_START_DATE = "estimatedStartDate";
+	public static final String TIME_TO_COMPLETE_SCEME = "timeToCompleteSceme";
+	public static final String DESCRIPTION = "description";
+	
+	
+	public static final String IS_JOINT_VENTURE = "isJointVenture";
+	public static final String PERMISSION_TO_CARRYOUT = "permissionToCarryOut";
+	public static final String EMERGENCY_CONTACT_NO = "emergencyContactNo";
+	public static final String NAME_OF_OTHER_PARTNER = "nameOfOtherPartners";
+	public static final String COMPANY_NAME = "companyName";
+	public static final String NDA_STATUS = "ndaStatus";
+	public static final String NDA_COMPLETION_DATE = "ndaCompletionDate";
+	public static final String EXPECTED_RENTAL_LEVEL = "expectedRentalLevel";
+	public static final String ACCOMODATION_TYPE = "accommodationType";
+	public static final String HMO_DEDUCTION = "hmoDeductions";
+	public static final String HAVE_ITS_OWM_METERIAL_SUPPLY = "haveItsOwnMeteringSupply";
+	public static final String RATEABLE_VALUE = "rateableValue";
+	public static final String WATER_RATES_VALUE = "waterRatesValue";
+	public static final String NUMBER_OF_STUDIOFLATES = "numberOfStudioFlates";
+	public static final String IS_REFURBISHMENT_PROJECT = "isRefurbishmentProject";
+	public static final String SUSTAINABLE_FEATURES = "sustainableFeatures";
+	public static final String EXPECTED_EPC_RATING = "expectedEpcRating";	
+	public static final String ESTIMATED_HANDOVER_DATE = "estimatedHandoverDate";
+	public static final String INSURANCE_POLICY_NUMBER = "insurancePolicyNumber";
+	
+	
+	//Adding Checkbox Values
+	public static final String IS_WINDOWS_UPVC_LOCKABLE="isWindowsUPVCLockable";
+	public static final String IS_UPVC_EXTERNAL_DOORS="isUPVCExternalDoors";
+	public static final String IS_SOLIDWOOD_INTERNAL_DOORS="isSolidWoodInternalDoors";
+	public static final String IS_KITCHEN_FACILITIES="isKitchenFacilities";
+	public static final String IS_TOILET_FACILITIES="isToiletFacilities";
+	public static final String IS_PAINTED="isPainted";
+	public static final String IS_WALLS_IN_CONTEMPORARY_PAINTED="isWallsInContemporaryPainted";
+	public static final String IS_CARPETED_THROUGHOUT="isCarpetedThroughout";
+	public static final String IS_OUTDOOR_COMMUNALDEVICE="isOutdoorCommunalDevice";
+	public static final String CHECK_FOR_UPLOAD_DOCUMENTS = "checkForUploadDocuments";
+	public static final String CHECK_FOR_ADMIN_UPLOAD_DOCUMENTS = "checkForAdminUploadDocuments";
+	
+	
+	private String uniqueReference;
+	private String contactPerson;
+	private boolean enable;
+	private Short statusId;
+	private Long propertydeveloperId;
+	private Address addressObj;
+	private String statusStr;
+	private AssignModel assignModel;
+	private Long assignToUserId;
+	private PropertyDeveloper propertyDeveloperObj;
+	private UserLogin loginObj;
+	private String typeOfProposedProp;
+	private String noOfUnits;
+	private String energySavingFeatures;
+	private String estimatedStartDate;
+	private String timeToCompleteSceme;
+	private String description;
+	
+	private String isJointVenture;
+	private String permissionToCarryOut;
+	private String emergencyContactNo;
+	private String nameOfOtherPartners;
+	private String companyName;
+	private String ndaStatus;
+	private String ndaCompletionDate;
+	private String expectedRentalLevel;
+	private String accommodationType;
+	private String hmoDeductions;
+	private String haveItsOwnMeteringSupply;
+	private String rateableValue;
+	private String waterRatesValue;
+	private String numberOfStudioFlates;
+	private String isRefurbishmentProject;
+	private String sustainableFeatures;
+	private String expectedEpcRating;
+	private String estimatedHandoverDate;
+	private String insurancePolicyNumber;
+
+	private String isWindowsUPVCLockable;
+	private String isUPVCExternalDoors;
+	private String isSolidWoodInternalDoors;
+	private String isKitchenFacilities;
+	private String isToiletFacilities;
+	private String isPainted;
+	private String isWallsInContemporaryPainted;
+	private String isCarpetedThroughout;
+	private String isOutdoorCommunalDevice;
+	
+	private String checkForUploadDocuments;
+    private String checkForAdminUploadDocuments;
+    
+	private List<PDDocuments> drawings;
+	private List<PDDocuments> specifications;
+	private List<PDDocuments> landRegistery;
+	private List<PDDocuments> tenderDocuments;
+	private List<PDDocuments> constructionSchedule;
+	private List<PDDocuments> additionalDocuments1;             // list for future references
+	private List<PDDocuments> additionalDocuments2;
+	private List<PDDocuments> additionalDocuments3;
+	private List<PDDocuments> additionalDocuments4;
+	private List<PDDocuments> additionalDocuments5;
+	private List<PDDocuments> images;
+	private List<PDDocuments> adminUploadedDoc;
+	
+	private boolean checkForEditDoc = false;
+	
+	public String getIsWindowsUPVCLockable() {
+		return isWindowsUPVCLockable;
+	}
+	public void setIsWindowsUPVCLockable(String isWindowsUPVCLockable) {
+		this.isWindowsUPVCLockable = isWindowsUPVCLockable;
+	}
+	public String getIsUPVCExternalDoors() {
+		return isUPVCExternalDoors;
+	}
+	public void setIsUPVCExternalDoors(String isUPVCExternalDoors) {
+		this.isUPVCExternalDoors = isUPVCExternalDoors;
+	}
+	public String getIsSolidWoodInternalDoors() {
+		return isSolidWoodInternalDoors;
+	}
+	public void setIsSolidWoodInternalDoors(String isSolidWoodInternalDoors) {
+		this.isSolidWoodInternalDoors = isSolidWoodInternalDoors;
+	}
+	public String getIsKitchenFacilities() {
+		return isKitchenFacilities;
+	}
+	public void setIsKitchenFacilities(String isKitchenFacilities) {
+		this.isKitchenFacilities = isKitchenFacilities;
+	}
+	public String getIsToiletFacilities() {
+		return isToiletFacilities;
+	}
+	public void setIsToiletFacilities(String isToiletFacilities) {
+		this.isToiletFacilities = isToiletFacilities;
+	}
+	public String getIsPainted() {
+		return isPainted;
+	}
+	public void setIsPainted(String isPainted) {
+		this.isPainted = isPainted;
+	}
+	public String getIsWallsInContemporaryPainted() {
+		return isWallsInContemporaryPainted;
+	}
+	public void setIsWallsInContemporaryPainted(String isWallsInContemporaryPainted) {
+		this.isWallsInContemporaryPainted = isWallsInContemporaryPainted;
+	}
+	public String getIsCarpetedThroughout() {
+		return isCarpetedThroughout;
+	}
+	public void setIsCarpetedThroughout(String isCarpetedThroughout) {
+		this.isCarpetedThroughout = isCarpetedThroughout;
+	}
+	public String getIsOutdoorCommunalDevice() {
+		return isOutdoorCommunalDevice;
+	}
+	public void setIsOutdoorCommunalDevice(String isOutdoorCommunalDevice) {
+		this.isOutdoorCommunalDevice = isOutdoorCommunalDevice;
+	}
+	public String getExpectedEpcRating() {
+		return expectedEpcRating;
+	}
+	public void setExpectedEpcRating(String expectedEpcRating) {
+		this.expectedEpcRating = expectedEpcRating;
+	}
+
+	public List<PDDocuments> getAdminUploadedDoc() {
+		return adminUploadedDoc;
+	}
+	public void setAdminUploadedDoc(List<PDDocuments> adminUploadedDoc) {
+		this.adminUploadedDoc = adminUploadedDoc;
+	}
+	public List<PDDocuments> getDrawings() {
+		return drawings;
+	}
+	public void setDrawings(List<PDDocuments> drawings) {
+		this.drawings = drawings;
+	}
+	public List<PDDocuments> getSpecifications() {
+		return specifications;
+	}
+	public void setSpecifications(List<PDDocuments> specifications) {
+		this.specifications = specifications;
+	}
+	public List<PDDocuments> getLandRegistery() {
+		return landRegistery;
+	}
+	public void setLandRegistery(List<PDDocuments> landRegistery) {
+		this.landRegistery = landRegistery;
+	}
+	public List<PDDocuments> getTenderDocuments() {
+		return tenderDocuments;
+	}
+	public void setTenderDocuments(List<PDDocuments> tenderDocuments) {
+		this.tenderDocuments = tenderDocuments;
+	}
+	
+	public List<PDDocuments> getConstructionSchedule() {
+		return constructionSchedule;
+	}
+	public void setConstructionSchedule(List<PDDocuments> constructionSchedule) {
+		this.constructionSchedule = constructionSchedule;
+	}
+	public List<PDDocuments> getAdditionalDocuments1() {
+		return additionalDocuments1;
+	}
+	public void setAdditionalDocuments1(List<PDDocuments> additionalDocuments1) {
+		this.additionalDocuments1 = additionalDocuments1;
+	}
+	public List<PDDocuments> getAdditionalDocuments2() {
+		return additionalDocuments2;
+	}
+	public void setAdditionalDocuments2(List<PDDocuments> additionalDocuments2) {
+		this.additionalDocuments2 = additionalDocuments2;
+	}
+	public List<PDDocuments> getAdditionalDocuments3() {
+		return additionalDocuments3;
+	}
+	public void setAdditionalDocuments3(List<PDDocuments> additionalDocuments3) {
+		this.additionalDocuments3 = additionalDocuments3;
+	}
+	public List<PDDocuments> getAdditionalDocuments4() {
+		return additionalDocuments4;
+	}
+	public void setAdditionalDocuments4(List<PDDocuments> additionalDocuments4) {
+		this.additionalDocuments4 = additionalDocuments4;
+	}
+	public List<PDDocuments> getAdditionalDocuments5() {
+		return additionalDocuments5;
+	}
+	
+	public void setAdditionalDocuments5(List<PDDocuments> additionalDocuments5) {
+		this.additionalDocuments5 = additionalDocuments5;
+	}
+	
+	public Short getStatusId() {
+		return statusId;
+	}
+	
+	public void setStatusId(Short statusId) {
+		this.statusId = statusId;
+	}
+	
+	public PropertyDeveloper getPropertyDeveloperObj() {
+		return propertyDeveloperObj;
+	}
+	
+	public void setPropertyDeveloperObj(PropertyDeveloper propertyDeveloperObj) {
+		this.propertyDeveloperObj = propertyDeveloperObj;
+	}
+	
+	public String getTypeOfProposedProp() {
+		return typeOfProposedProp;
+	}
+	
+	public void setTypeOfProposedProp(String typeOfProposedProp) {
+		this.typeOfProposedProp = typeOfProposedProp;
+	}
+	
+	public String getNoOfUnits() {
+		return noOfUnits;
+	}
+	
+	public void setNoOfUnits(String noOfUnits) {
+		this.noOfUnits = noOfUnits;
+	}
+	
+	public String getEnergySavingFeatures() {
+		return energySavingFeatures;
+	}
+	public void setEnergySavingFeatures(String energySavingFeatures) {
+		this.energySavingFeatures = energySavingFeatures;
+	}
+	public String getEstimatedStartDate() {
+		return estimatedStartDate;
+	}
+	public void setEstimatedStartDate(String estimatedStartDate) {
+		this.estimatedStartDate = estimatedStartDate;
+	}
+	public String getTimeToCompleteSceme() {
+		return timeToCompleteSceme;
+	}
+	public void setTimeToCompleteSceme(String timeToCompleteSceme) {
+		this.timeToCompleteSceme = timeToCompleteSceme;
+	}
+	public UserLogin getLoginObj() {
+		return loginObj;
+	}
+	public void setLoginObj(UserLogin loginObj) {
+		this.loginObj = loginObj;
+	}
+	public String getStatusStr() {
+		return statusStr;
+	}
+	public void setStatusStr(String statusStr) {
+		this.statusStr = statusStr;
+	}
+	public boolean isEnable() {
+		return enable;
+	}
+	public void setEnable(boolean enable) {
+		this.enable = enable;
+	}
+	public Address getAddressObj() {
+		return addressObj;
+	}
+	public void setAddressObj(Address addressObj) {
+		this.addressObj = addressObj;
+	}
+	public String getContactPerson() {
+		return contactPerson;
+	}
+	public void setContactPerson(String contactPerson) {
+		this.contactPerson = contactPerson;
+	}
+		
+	public String getUniqueReference() {
+		return uniqueReference;
+	}
+	public void setUniqueReference(String uniqueReference) {
+		this.uniqueReference = uniqueReference;
+	}
+	public Long getPropertyDeveloperId() {
+		return propertydeveloperId;
+	}
+	public void setPropertyDeveloperId(Long propertydeveloperId) {
+		this.propertydeveloperId = propertydeveloperId;
+	}
+	public AssignModel getAssignModel() {
+		return assignModel;
+	}
+	
+	public void setAssignModel(AssignModel assignModel) {
+		this.assignModel = assignModel;
+	}
+	
+	public Long getAssignToUserId() {
+		return assignToUserId;
+	}
+	
+	public void setAssignToUserId(Long assignToUserId) {
+		this.assignToUserId = assignToUserId;
+	}
+	public List<PDDocuments> getImages() {
+		return images;
+	}
+	public void setImages(List<PDDocuments> images) {
+		this.images = images;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	 
+	public String getIsJointVenture() {
+		return isJointVenture;
+	}
+	
+	
+	public void setIsJointVenture(String isJointVenture) {
+		this.isJointVenture = isJointVenture;
+	}
+	
+	
+	public String getPermissionToCarryOut() {
+		return permissionToCarryOut;
+	}
+	
+	public void setPermissionToCarryOut(String permissionToCarryOut) {
+		this.permissionToCarryOut = permissionToCarryOut;
+	}
+	
+	
+	public String getEmergencyContactNo() {
+		return emergencyContactNo;
+	}
+	public void setEmergencyContactNo(String emergencyContactNo) {
+		this.emergencyContactNo = emergencyContactNo;
+	}
+	public String getNameOfOtherPartners() {
+		return nameOfOtherPartners;
+	}
+	public void setNameOfOtherPartners(String nameOfOtherPartners) {
+		this.nameOfOtherPartners = nameOfOtherPartners;
+	}
+	public String getCompanyName() {
+		return companyName;
+	}
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+	public String getNdaStatus() {
+		return ndaStatus;
+	}
+	public void setNdaStatus(String ndaStatus) {
+		this.ndaStatus = ndaStatus;
+	}
+	public String getNdaCompletionDate() {
+		return ndaCompletionDate;
+	}
+	public void setNdaCompletionDate(String ndaCompletionDate) {
+		this.ndaCompletionDate = ndaCompletionDate;
+	}
+	public String getExpectedRentalLevel() {
+		return expectedRentalLevel;
+	}
+	public void setExpectedRentalLevel(String expectedRentalLevel) {
+		this.expectedRentalLevel = expectedRentalLevel;
+	}
+	public String getAccommodationType() {
+		return accommodationType;
+	}
+	public void setAccommodationType(String accommodationType) {
+		this.accommodationType = accommodationType;
+	}
+	public String getHmoDeductions() {
+		return hmoDeductions;
+	}
+	public void setHmoDeductions(String hmoDeductions) {
+		this.hmoDeductions = hmoDeductions;
+	}
+	public String getHaveItsOwnMeteringSupply() {
+		return haveItsOwnMeteringSupply;
+	}
+	public void setHaveItsOwnMeteringSupply(String haveItsOwnMeteringSupply) {
+		this.haveItsOwnMeteringSupply = haveItsOwnMeteringSupply;
+	}
+	public String getRateableValue() {
+		return rateableValue;
+	}
+	public void setRateableValue(String rateableValue) {
+		this.rateableValue = rateableValue;
+	}
+	public String getWaterRatesValue() {
+		return waterRatesValue;
+	}
+	public void setWaterRatesValue(String waterRatesValue) {
+		this.waterRatesValue = waterRatesValue;
+	}
+	public String getNumberOfStudioFlates() {
+		return numberOfStudioFlates;
+	}
+	public void setNumberOfStudioFlates(String numberOfStudioFlates) {
+		this.numberOfStudioFlates = numberOfStudioFlates;
+	}
+	public String getIsRefurbishmentProject() {
+		return isRefurbishmentProject;
+	}
+	public void setIsRefurbishmentProject(String isRefurbishmentProject) {
+		this.isRefurbishmentProject = isRefurbishmentProject;
+	}
+	public String getSustainableFeatures() {
+		return sustainableFeatures;
+	}
+	public void setSustainableFeatures(String sustainableFeatures) {
+		this.sustainableFeatures = sustainableFeatures;
+	}
+	public String getEstimatedHandoverDate() {
+		return estimatedHandoverDate;
+	}
+	public void setEstimatedHandoverDate(String estimatedHandoverDate) {
+		this.estimatedHandoverDate = estimatedHandoverDate;
+	}
+	
+	public String getInsurancePolicyNumber() {
+		return insurancePolicyNumber;
+	}
+	public void setInsurancePolicyNumber(String insurancePolicyNumber) {
+		this.insurancePolicyNumber = insurancePolicyNumber;
+	}
+	
+	public boolean getCheckForEditDoc() {
+		return checkForEditDoc;
+	}
+	
+	public void setCheckForEditDoc(boolean checkForEditDoc) {
+		this.checkForEditDoc = checkForEditDoc;
+	}
+	
+	public String getCheckForUploadDocuments() {
+		return checkForUploadDocuments;
+	}
+	public void setCheckForUploadDocuments(String checkForUploadDocuments) {
+		this.checkForUploadDocuments = checkForUploadDocuments;
+	}
+	
+	
+	public String getCheckForAdminUploadDocuments() {
+		return checkForAdminUploadDocuments;
+	}
+	public void setCheckForAdminUploadDocuments(String checkForAdminUploadDocuments) {
+		this.checkForAdminUploadDocuments = checkForAdminUploadDocuments;
+	}
+	@Override
+	public String toString() {
+		return "PDProperty [uniqueReference=" + uniqueReference
+				+ ", contactPerson=" + contactPerson + ", enable=" + enable
+				+ ", statusId=" + statusId + ", propertydeveloperId="
+				+ propertydeveloperId + ", addressObj=" + addressObj
+				+ ", statusStr=" + statusStr + ", assignModel=" + assignModel
+				+ ", assignToUserId=" + assignToUserId
+				+ ", propertyDeveloperObj=" + propertyDeveloperObj
+				+ ", loginObj=" + loginObj + ", typeOfProposedProp="
+				+ typeOfProposedProp + ", noOfUnits=" + noOfUnits
+				+ ", energySavingFeatures=" + energySavingFeatures
+				+ ", estimatedStartDate=" + estimatedStartDate
+				+ ", timeToCompleteSceme=" + timeToCompleteSceme
+				+ ", description=" + description + ", isJointVenture="
+				+ isJointVenture + ", permissionToCarryOut="
+				+ permissionToCarryOut + ", emergencyContactNo="
+				+ emergencyContactNo + ", nameOfOtherPartners="
+				+ nameOfOtherPartners + ", companyName=" + companyName
+				+ ", ndaStatus=" + ndaStatus + ", ndaCompletionDate="
+				+ ndaCompletionDate + ", expectedRentalLevel="
+				+ expectedRentalLevel + ", accommodationType="
+				+ accommodationType + ", hmoDeductions=" + hmoDeductions
+				+ ", haveItsOwnMeteringSupply=" + haveItsOwnMeteringSupply
+				+ ", rateableValue=" + rateableValue + ", waterRatesValue="
+				+ waterRatesValue + ", numberOfStudioFlates="
+				+ numberOfStudioFlates + ", isRefurbishmentProject="
+				+ isRefurbishmentProject + ", sustainableFeatures="
+				+ sustainableFeatures + ", expectedEpcRating="
+				+ expectedEpcRating + ", estimatedHandoverDate="
+				+ estimatedHandoverDate + ", insurancePolicyNumber="
+				+ insurancePolicyNumber + ", isWindowsUPVCLockable="
+				+ isWindowsUPVCLockable + ", isUPVCExternalDoors="
+				+ isUPVCExternalDoors + ", isSolidWoodInternalDoors="
+				+ isSolidWoodInternalDoors + ", isKitchenFacilities="
+				+ isKitchenFacilities + ", isToiletFacilities="
+				+ isToiletFacilities + ", isPainted=" + isPainted
+				+ ", isWallsInContemporaryPainted="
+				+ isWallsInContemporaryPainted + ", isCarpetedThroughout="
+				+ isCarpetedThroughout + ", isOutdoorCommunalDevice="
+				+ isOutdoorCommunalDevice + ", drawings=" + drawings
+				+ ", specifications=" + specifications + ", landRegistery="
+				+ landRegistery + ", tenderDocuments=" + tenderDocuments
+				+ ", constructionSchedule=" + constructionSchedule
+				+ ", additionalDocuments1=" + additionalDocuments1
+				+ ", additionalDocuments2=" + additionalDocuments2
+				+ ", additionalDocuments3=" + additionalDocuments3
+				+ ", additionalDocuments4=" + additionalDocuments4
+				+ ", additionalDocuments5=" + additionalDocuments5
+				+ ", images=" + images + ", adminUploadedDoc="
+				+ adminUploadedDoc + ", checkForEditDoc=" + checkForEditDoc
+				+  ", checkForUploadDocuments=" + checkForUploadDocuments
+				+  ", checkForAdminUploadDocuments=" + checkForAdminUploadDocuments
+				+"]";
+	}
+	
+	
+	public JSONObject toJSON(boolean includeParent) throws JSONException{
+		JSONObject jObj = new JSONObject();
+		
+		if(includeParent)
+			jObj = super.toJSON();
+		jObj.put(PDProperty.CONTACT_PERSON, this.contactPerson);
+		jObj.put(PDProperty.UNIQUE_REFERENCE, this.uniqueReference);
+		jObj.put(PDProperty.PROPERTYDEVELOPER_ID, this.propertydeveloperId);
+		jObj.put(PDProperty.ENABLE, this.enable);
+		jObj.put(PDProperty.STATUS_ID, this.statusId);
+		jObj.put(PDProperty.TYPE_OF_PROPOSED_PROPERTY, this.typeOfProposedProp);
+		jObj.put(PDProperty.NUMBER_OF_UNITS, this.noOfUnits);
+		jObj.put(PDProperty.ENERGY_SAVING_FEATURES, this.energySavingFeatures);
+		jObj.put(PDProperty.ESTIMATED_START_DATE, this.estimatedStartDate);
+		jObj.put(PDProperty.TIME_TO_COMPLETE_SCEME, this.timeToCompleteSceme);
+		jObj.put(PDProperty.STATUS_ID,this.statusId);
+		jObj.put(PDProperty.DESCRIPTION,this.description);
+		jObj.put("statusStr", Status.get(this.statusId).value());
+		jObj.put(PDProperty.IS_JOINT_VENTURE, this.isJointVenture);
+		jObj.put(PDProperty.PERMISSION_TO_CARRYOUT, this.permissionToCarryOut);
+		jObj.put(PDProperty.EMERGENCY_CONTACT_NO, this.emergencyContactNo);
+		jObj.put(PDProperty.NAME_OF_OTHER_PARTNER, this.nameOfOtherPartners);
+		jObj.put(PDProperty.COMPANY_NAME, this.companyName);
+		jObj.put(PDProperty.NDA_STATUS, this.ndaStatus);
+		jObj.put(PDProperty.NDA_COMPLETION_DATE, this.ndaCompletionDate);
+		jObj.put(PDProperty.EXPECTED_RENTAL_LEVEL, this.expectedRentalLevel);
+		jObj.put(PDProperty.ACCOMODATION_TYPE, this.accommodationType);
+		jObj.put(PDProperty.HMO_DEDUCTION, this.hmoDeductions);
+		jObj.put(PDProperty.HAVE_ITS_OWM_METERIAL_SUPPLY,this.haveItsOwnMeteringSupply);
+		jObj.put(PDProperty.RATEABLE_VALUE,this.rateableValue);
+		jObj.put(PDProperty.WATER_RATES_VALUE, this.waterRatesValue);
+		jObj.put(PDProperty.NUMBER_OF_STUDIOFLATES, this.numberOfStudioFlates);
+		jObj.put(PDProperty.IS_REFURBISHMENT_PROJECT, this.isRefurbishmentProject);
+		jObj.put(PDProperty.SUSTAINABLE_FEATURES, this.sustainableFeatures);
+		jObj.put(PDProperty.ESTIMATED_HANDOVER_DATE, this.estimatedHandoverDate);
+		jObj.put(PDProperty.INSURANCE_POLICY_NUMBER, this.insurancePolicyNumber);
+		jObj.put(PDProperty.CHECK_FOR_UPLOAD_DOCUMENTS, this.checkForUploadDocuments);
+		jObj.put(PDProperty.CHECK_FOR_ADMIN_UPLOAD_DOCUMENTS, this.checkForAdminUploadDocuments);
+		return jObj;
+		}
+
+
+}

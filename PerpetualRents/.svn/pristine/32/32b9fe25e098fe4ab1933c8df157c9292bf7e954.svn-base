@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        
+        <p> Dear Property Developer <span th:text="${propertyDeveloperName}"></span></p>
+        <p> your document has been successfully updated.</p>
+        <p>Reference No : <span th:text="${reference}"></span></p>
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>		     
+    </body>
+    
+
+</html>
+
+

@@ -1,0 +1,25 @@
+@charset "utf-8";
+/* CSS Document */
+/* ===================================== 320 X 479 =======================================*/
+@media (min-width: 320px) and (max-width: 479px) {}
+	 
+/* ===================================== 480 X 767 =======================================*/
+@media (min-width: 480px) and (max-width: 767px) {}
+
+/* ===================================== 768 X 979 =======================================*/
+@media (min-width: 768px) and (max-width: 979px) {}
+
+/* ===================================== 980 X 1024 =======================================*/
+@media (min-width: 980px) and (max-width: 1023px) {
+	.flex-control-nav { top:225px;}
+	.ban-cot { top:228px;}
+	.flexslider { height:252px;}
+	.banner { height:226px;}
+	}
+/* ===================================== 1024 X 1280 =======================================*/
+@media (min-width: 1024px) and (max-width: 1280px) {
+	.flex-control-nav { top:225px;}
+	.ban-cot { top:228px;}
+	.flexslider { height:252px;}
+	.banner { height:226px;}
+}

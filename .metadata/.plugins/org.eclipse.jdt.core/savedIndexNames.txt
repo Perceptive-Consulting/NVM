@@ -1,0 +1,1 @@
+INDEX VERSION 1.126+G:\indigo-PerpetualRents\.metadata\.plugins\org.eclipse.jdt.core

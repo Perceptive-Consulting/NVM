@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+                
+		<p> Dear <span th:text="${receiverName}"></span> of <span th:text="${postCode}"></span>, your property details
+		have been updated and is <span th:text="${status}"></span> Complete. Please ensure that you have uploaded a copy of 
+		the &lsquo;<a href="https://www.gov.uk/government/organisations/land-registry">Title deeds</a>&rsquo; on your login,
+		one should have a copy unless the property you own has never been registered online. However, you or your solicitor 
+		should be in possession of the &lsquo;<a href="https://www.gov.uk/government/organisations/land-registry">Title deeds</a>&rsquo; alternatively
+		you can copy and paste the link below into your favorite browser and download a 
+		copy from <a href="https://www.gov.uk/government/organisations/land-registry">https://www.gov.uk/government/organisations/land-registry</a></p>
+
+		
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     
+    </body>
+
+</html>

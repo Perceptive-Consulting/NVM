@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+            
+                
+        <p>Dear <span th:text="${receiverName}"></span>,</p>
+
+		<p>Welcome to the home of 'the no voids man',</p>
+		
+		<p>Your credentials are : </p>
+		
+		<p>Username : <span th:text="${username}"></span></p>
+		
+		<p>Password : <span th:text="${password}"></span></p>
+		
+		<p>Please keep your user name and your password safe as the protection of your data is paramount to us.</p>
+		
+		<p>If you have any issues then use the live chat or email info@ashantidutchpropertyletting.co.uk.</p>
+		
+		<p>You are nearly ready to register your property on our site and qualify for guaranteed rent for 3 years, however, to qualify you will need to agree to the following terms and conditions:</p> 
+		
+		 <p>1. The terms and conditions for the supply of property management services (these are applicable to the property you are supplying and contains information on fees and payments) </p>
+		 <p>2. Lettings with additional property and tenancy management service (this is what we will provide to you as a service and is in addition to the above and also contains information on fees and payments)</p>
+		 <p>3. when you register your property online, you will need to provide mandatory and none mandatory certificates, providing these will speed up our decision in regard to accepting your property, based on averaged rents this equates to £15 per day or £105 per week that is lost due to not providing the mandatory certificates, if the property is empty.</p>  
+		  
+		
+			
+		<p>&nbsp;</p>
+		
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+    </body>
+    
+
+</html>

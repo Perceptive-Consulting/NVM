@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+          
+        <!-- Dear [charity name] the super administrator has added the following areas to your account and has verified your account, you should now be able to crate your users and allocate areas to these users     --> 
+                
+        
+        <p>Dear <span th:text="${pmcName}"></span>, the super administrator has added the following areas to your account and has verified your account.</p>
+        
+        <p>you should now be able to create your users and allocate areas to these users.</p> 
+        
+        <p>Cities are : <span th:text="${cities}"></span></p>
+        
+        <p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

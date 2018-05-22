@@ -1,0 +1,288 @@
+package com.pcs.perpetualRents.util.mail;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.Multipart;
+import javax.mail.Part;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.ReceivedDateTerm;
+import javax.mail.search.SearchTerm;
+
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+
+import com.pcs.perpetualRents.business.bean.Conversation;
+import com.pcs.perpetualRents.business.bean.Mail;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.dao.MailDAO;
+import com.pcs.perpetualRents.enm.EmailSubject;
+import com.pcs.perpetualRents.enm.MailEventType;
+import com.pcs.perpetualRents.enm.MailFlowType;
+import com.pcs.perpetualRents.manager.ConversationManager;
+import com.pcs.perpetualRents.manager.MailManager;
+
+
+public class SynchronizeMailUtility {
+	
+	private static Logger logger = ApplicationSettings.getLogger(SynchronizeMailUtility.class.getName()); 
+	
+	private Properties props;
+	private Session session;
+	
+	private ApplicationSettings applicationSettings;
+	private JavaMailSender mailSender;
+	
+	private MailManager mailManager;
+	private ConversationManager conversationManager;
+	private MailDAO mailDAO; 
+	private Store store;
+	private Calendar calendar;  
+	private SimpleDateFormat sdf;
+	private SearchTerm searchTerm;
+	private static int readCounter = 0;
+	
+	public SynchronizeMailUtility(){
+		
+		props = new Properties();
+        props.setProperty("mail.store.protocol", "imaps");
+        props.setProperty("mail.imap.connectionpoolsize", "1");
+        props.setProperty("mail.imap.separatestoreconnection", "true");
+        
+        session = Session.getInstance(props, null);
+        sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+        calendar = Calendar.getInstance();
+	}
+	
+	public void synchronizeMailRead(){
+		logger.info("------------------************ [ Job Started ] *************------------");
+		try{
+			if(store == null || !store.isConnected()){
+				store = session.getStore();
+				store.connect("imap.gmail.com", applicationSettings.getControlEmailId(), applicationSettings.getControlEmailPassword());
+			}
+			Mail mail = mailManager.getLastMailByFlowStatus(MailFlowType.RECEIVED);
+			Date dateObj = null;
+			
+			if(mail == null){
+				mail = new Mail();
+			}else{
+				dateObj = sdf.parse(mail.getReceivedOn());
+				calendar.setTime(dateObj);
+			}
+			
+			setSearchTerm();
+			
+			Folder inbox = store.getFolder("INBOX");
+	        inbox.open(Folder.READ_ONLY);
+	        Message[] messageArray = inbox.search(searchTerm);
+	        
+	        if(messageArray != null && messageArray.length > 0){
+	        	
+	        	if(readCounter == messageArray.length){
+	        		return;
+	        	}else{
+	        		readCounter = messageArray.length;
+	        	}
+	        	for(Message message : messageArray){
+	        		MimeMessage mimeMessage = (MimeMessage) message;
+	        		String conversationIdentity = mimeMessage.getSubject();
+	        		
+	        		if(conversationIdentity != null && conversationIdentity.length() > 0 ){
+						 String convIdentity =  getSubjectId(EmailSubject.QUOTATION_PERPETUAL.value(),conversationIdentity);
+						 if(convIdentity == null){
+							 convIdentity =  getSubjectId(EmailSubject.PMC_LANDLORD_SUBJECT.value(),conversationIdentity);
+							 if(convIdentity == null)
+								 continue;
+							 else
+								 conversationIdentity = convIdentity; 
+						 }else{
+							 conversationIdentity = convIdentity;	 
+						 }
+						  
+					 }
+	        		
+	        		Conversation conversationObj = conversationManager.loadConversationByConvIdentity(conversationIdentity);
+	        		if(conversationObj != null){
+	        			 String mailId1 = conversationObj.getMailId1();
+						 String mailFromStr = getMessageWithoutAngular(mimeMessage.getFrom()[0].toString());
+						 System.out.println("Mailid1 : " +  mailId1 + " " + " msg.getFrom()[0].toString() " + mimeMessage.getFrom()[0].toString());
+						 if(mailId1.equalsIgnoreCase(mailFromStr)){
+							 mail.setMailTo(conversationObj.getMailId2());
+							 mail.setMailFrom(conversationObj.getMailId1());
+							 //mail.setMailEventActor((short)MailEventActor.LANDLORD.id());
+							 mail.setMailEventActor(conversationObj.getActorOneObjectTypeId());
+						 }else{
+							 mail.setMailTo(conversationObj.getMailId1());
+							 mail.setMailFrom(conversationObj.getMailId2());
+							 //mail.setMailEventActor((short)MailEventActor.CONTRACTOR.id());
+							 mail.setMailEventActor(conversationObj.getActorTwoObjectTypeId());
+						 }
+						 mail.setMailEventType((short)MailEventType.SEND_QUOTATION.id());
+						 mail.setMailOrigin(applicationSettings.getControlEmailId());
+						 mail.setMailFlowType((short)MailFlowType.RECEIVED.id());
+						 mail.setMailMessageId(""+mimeMessage.getMessageNumber());
+						 mail.setReceivedOn(mimeMessage.getReceivedDate().toString());
+						 mail.setSubject(conversationIdentity);
+						 mail.setMailMessageReference(getMessageWithoutAngular(mimeMessage.getMessageID()));
+						 mail.setConversationId(conversationObj.getId());
+						 Mail tmpMail = mailDAO.getMailByMessageReference(mail.getMailMessageReference());
+						 if(tmpMail != null){
+							 continue;
+						 }
+						 processMessage(mimeMessage.getContent(),mail);
+						 String bodyStr = mail.getMailBody();
+						 
+						 if(bodyStr!=null && bodyStr.length() > 0){
+							mail.setMailBody(bodyStr);
+							sendMail(mail);
+							try{
+								//Long status = mailDAO.saveMail(mail);
+								mailDAO.saveMail(mail);
+								//System.out.println("status : " + status);
+							}catch(Exception e){
+								e.printStackTrace();
+							}
+							
+						
+						 }
+	        		}
+	        	}
+	        	inbox.close(false);
+	        }
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		logger.info("------------------************ [ Job Ended ] *************------------");
+	}
+	
+	private void processMessage(Object content,Mail mail) throws Exception{
+		if(content instanceof String){
+			 String msgStr = content.toString();
+			 msgStr = msgStr.replaceAll(mail.getMailFrom(),mail.getMailOrigin());
+        	 mail.setMailBody(msgStr);
+		}
+		if(content instanceof Multipart){
+			Multipart mutipart = (Multipart) content;
+			int attachmentCounter = 0 ;
+			for(int i= 0 ; i<mutipart.getCount() ; i++){
+				MimeBodyPart  bodyPart =  (MimeBodyPart)mutipart.getBodyPart(i);
+				 if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
+                     attachmentCounter++;
+                 } else {
+                	 String msgStr = processMessageBody(bodyPart.getContent(),mail);
+                	 msgStr = msgStr.replaceAll(mail.getMailFrom(),mail.getMailOrigin());
+                	 mail.setMailBody(msgStr);
+                 }
+			}
+			mail.setAttachmentCount(attachmentCounter);
+		}
+	}
+	
+	private String  processMessageBody(Object content,Mail mail) throws Exception {
+		String tmpMessageStr = "";  
+		if(content instanceof String){
+			tmpMessageStr = content.toString();
+			tmpMessageStr.replaceAll(mail.getMailFrom(),mail.getMailOrigin());
+		}
+		if(content instanceof Multipart){
+			Multipart mutipart = (Multipart) content;
+			MimeBodyPart  bodyPart =  (MimeBodyPart)mutipart.getBodyPart(0);
+			tmpMessageStr = bodyPart.getContent().toString();
+		}
+		return tmpMessageStr;
+	}
+	
+	private String getMessageWithoutAngular(String str){
+		if(str!=null && str.contains("<") && str.contains(">")){
+			str = str.substring(str.indexOf("<")+1, str.indexOf(">"));
+		}
+		return str;
+	}
+	
+	private void sendMail(Mail mail) throws Exception {
+		logger.info("SENDING MAIL BY THREAD TO " + mail.getMailTo() + " WITH SUBJECT " + mail.getSubject());
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+		mimeMessageHelper.setTo(mail.getMailTo());
+		mimeMessageHelper.setSubject(mail.getSubject());
+		mimeMessageHelper.setText(mail.getMailBody(), true); 
+		  
+	    mailSender.send(mimeMessage);
+	    logger.info("SUCCESSFULLY SEND TO " + mail.getMailTo() + " WITH SUBJECT " + mail.getSubject());
+	}
+	
+	private void setSearchTerm(){
+		searchTerm = new ReceivedDateTerm(ComparisonTerm.GE, calendar.getTime());
+		
+	}
+	
+	/*private void setMultipleSearchTerm(){
+		searchTerm = new OrTerm(new SearchTerm[]{new ReceivedDateTerm(ComparisonTerm.GE, calendar.getTime()),new SubjectTerm("Quotation-Perpetual")});
+	}*/
+	
+	//in:  Re: Interested In Your Property Situated at 201301(PRUKL219403-PRUKPMC13464)
+	//It's too costly
+	
+	private String getSubjectId(String prefix, String subject){
+        
+		if(subject.contains("(") && subject.contains(")") && subject.contains(prefix)){
+			int index = subject.indexOf(prefix) + prefix.length();
+	        int index1 = subject.indexOf(")",index);
+	        
+	        String id = subject.substring(index, index1 + 1);
+	        return prefix + id.trim();
+		}
+		return null;
+	}
+	
+	public ApplicationSettings getApplicationSettings() {
+		return applicationSettings;
+	}
+	
+	public void setApplicationSettings(ApplicationSettings applicationSettings) {
+		this.applicationSettings = applicationSettings;
+	}
+	
+	public JavaMailSender getMailSender() {
+		return mailSender;
+	}
+	
+	public void setMailSender(JavaMailSender mailSender) {
+		this.mailSender = mailSender;
+	}
+
+	public MailManager getMailManager() {
+		return mailManager;
+	}
+
+	public void setMailManager(MailManager mailManager) {
+		this.mailManager = mailManager;
+	}
+
+	public ConversationManager getConversationManager() {
+		return conversationManager;
+	}
+
+	public void setConversationManager(ConversationManager conversationManager) {
+		this.conversationManager = conversationManager;
+	}
+
+	public MailDAO getMailDAO() {
+		return mailDAO;
+	}
+
+	public void setMailDAO(MailDAO mailDAO) {
+		this.mailDAO = mailDAO;
+	}
+}

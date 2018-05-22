@@ -1,0 +1,22 @@
+/*Integer status =  transactionTemplate.execute(new TransactionCallback<Integer>() {
+				@Override
+				public Integer doInTransaction(TransactionStatus transactionStatus) {
+					try{
+						Address addressObj = obj.getAddressObj();
+						UserLogin loginObj = obj.getLoginObj();
+						Long userLoginId = userLoginDAO.create(loginObj);
+						obj.setUserLoginId(userLoginId);
+						Long landlordId = landLordDAO.create(obj);
+						addressObj.setObjectType(ObjectType.LANDLORD.id());
+						addressObj.setObjectId(landlordId);
+						return 1;
+					}catch (Exception e) {
+						e.printStackTrace();
+						transactionStatus.setRollbackOnly();
+						return null;
+					}	
+				}
+			});
+			
+			return  status == null ? true : false;*/
+			

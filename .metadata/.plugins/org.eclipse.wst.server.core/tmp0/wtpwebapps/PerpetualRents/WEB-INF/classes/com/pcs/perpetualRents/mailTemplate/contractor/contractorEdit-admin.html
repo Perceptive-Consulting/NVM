@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        
+            
+        <p>Hi admin,</p>
+
+		<p>A Contractor <span th:text="${contactPerson}">XXX</span> has changed his profile.</p>
+		
+		<p>Company Name : <span th:text="${companyName}">XXX</span></p>
+		
+		<p>Reference : <span th:text="${reference}">XXX</span></p>
+		
+		<p>&nbsp;</p>
+
+		<p>Thanks</p>
+
+		<p><span th:text="${senderName}">Perpetual</span></p>
+					
+		<p>&nbsp;</p>
+    </body>
+</html>
+

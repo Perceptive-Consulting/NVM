@@ -1,0 +1,99 @@
+package com.pcs.perpetualRents.util.mail;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.mail.internet.MimeMessage;
+
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring3.SpringTemplateEngine;
+
+import com.pcs.perpetualRents.business.bean.Admin;
+import com.pcs.perpetualRents.business.bean.CharityRegisteration;
+import com.pcs.perpetualRents.business.bean.ContactDetails;
+import com.pcs.perpetualRents.common.bean.ApplicationSettings;
+import com.pcs.perpetualRents.manager.CommonManager;
+
+//http://ckeditor.com/demo
+public class CharityRegisterationMailUtility implements Runnable {
+	
+	private static Logger logger = ApplicationSettings.getLogger(CharityRegisterationMailUtility.class.getName()); 
+	
+	private JavaMailSender mailSender;
+	private CharityRegisteration charityObj;
+	private ApplicationSettings applicationSettings;
+	private SpringTemplateEngine templateEngine;
+	private CommonManager commonManager;
+	
+	public CharityRegisterationMailUtility() {
+		super();
+	}
+	
+	public CharityRegisterationMailUtility(final CharityRegisteration charityObj, final ApplicationSettings settingsObj, final JavaMailSender mailSender,
+			 SpringTemplateEngine templateEngine, CommonManager commonManager ) {
+		this.mailSender = mailSender;
+		this.charityObj = charityObj;
+		this.applicationSettings = settingsObj;
+		this.templateEngine = templateEngine;
+		this.commonManager = commonManager;
+	}
+	
+	@Override 
+	public void run() {
+		Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+		try{
+			logger.info("MAIL-THREAD has been started.");
+			charityRegisteration();
+			logger.finest("MAIL THREAD COMPLETED.");
+		
+		}catch (Exception e) {
+			e.printStackTrace();
+			logger.log(Level.SEVERE, "Some error has been occured" + e.getMessage());
+		}
+	}
+	
+	private void charityRegisteration(){
+		   try{
+				   	MimeMessage mimeMessage = mailSender.createMimeMessage();
+					MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+					Context ctx = new Context();
+					logger.info("ACTOR IS SUPER ADMIN" );
+					
+					
+			   Admin superAdmin = commonManager.loadsuperAdmin();
+			   if(superAdmin != null){
+				   
+				   ctx.setVariable("receiverName", superAdmin.getFirstName() + " " + superAdmin.getLastName());
+				   ctx.setVariable("name", charityObj.getName());
+				   ctx.setVariable("emailId", charityObj.getEmailId());
+				   ctx.setVariable("contactNumber",charityObj.getContactNumber());
+				   ctx.setVariable("city", charityObj.getCity());
+				   ctx.setVariable("message", charityObj.getMessage());
+				   
+				   ContactDetails detailObj = superAdmin.getContactDetailsObj();
+				   String emailId = "";
+				   if(detailObj != null){
+					   emailId = detailObj.getEmailId();
+					   mimeMessageHelper.setTo(detailObj.getEmailId());
+				   }else{
+					   emailId = applicationSettings.getAdminEmailId();
+					   mimeMessageHelper.setTo(applicationSettings.getAdminEmailId());
+				   }
+					
+					mimeMessageHelper.setSubject("Email From Perpetual");
+						this.templateEngine.initialize();
+					    final String htmlContent2 = this.templateEngine.process("pmc/charityFrontEndRegisteration.html", ctx);
+					 mimeMessageHelper.setText(htmlContent2, true); // true = isHtml
+					 ctx.setVariable("senderName", applicationSettings.getCommonEmailSenderName());
+					 
+					  mailSender.send(mimeMessage);
+					  logger.info("ADMIN : MAIL is sending to " + emailId);
+				   }
+			   }catch(Exception e){
+					e.printStackTrace();
+				}
+	   }
+	   
+}

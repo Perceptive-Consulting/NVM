@@ -1,0 +1,542 @@
+
+ CREATE TABLE `perpetualrents`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `username` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(45) NOT NULL,
+  `hintQuestion` VARCHAR(45) NULL,
+  `hintAnswer` VARCHAR(45) NULL,
+  `userTypeId` VARCHAR(45) NOT NULL,
+  'enabled' BIT(1) NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (`id`), 
+  UNIQUE KEY (username));
+
+CREATE TABLE `perpetual`.`tbl_perpetualrents_contractor` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `uniqueReference` VARCHAR(45) NOT NULL,
+  `companyName` VARCHAR(45) NOT NULL,
+  `businessNature` VARCHAR(45) NOT NULL,
+  `contactPerson` VARCHAR(45) NULL,
+  `tradingCommencementDate` VARCHAR(45) NOT NULL,
+  `companyRegisterationDate` VARCHAR(45) NOT NULL,
+  `vatNo` VARCHAR(45) NULL,
+  `userLoginId` INT(11) NOT NULL,
+  `statusId` INT(2) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetual`.`tbl_perpetualrents_propertydocumentdownloadstatus` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `isADPL1Downloaded` BIT(1) DEFAULT false,
+  `isADPL3Downloaded` BIT(1) DEFAULT false,
+  `isLandlordRegisterationDownloaded` BIT(1) DEFAULT false,
+  `landlordId` INT(11) NOT NULL,
+  `propertyId` INT(11) NULL,
+  PRIMARY KEY (`id`));
+  
+  
+  CREATE TABLE `perpetual`.`tbl_perpetualrents_functionalitycostmatrix` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `functionalityId` INT(11) NOT NULL,
+  `callOutMonToFri` VARCHAR(45) NOT NULL,
+  `callOutWeekends` VARCHAR(45) NOT NULL,
+  `hourlyRate` VARCHAR(45) NOT NULL,
+  `hourlyRateWeekends` VARCHAR(45) NULL,
+  `objectId` INT(11) NOT NULL,
+  `contractorId` INT(11) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetual`.`tbl_perpetualrents_turnoverdetails` (
+  `contractorId` INT(11) NOT NULL,
+  `financialYear` VARCHAR(45) NOT NULL,
+  `turnOver` VARCHAR(45) NOT NULL);
+  
+  
+   CREATE TABLE `perpetualgts`.`tbl_perpetualrents_contractorregisterationstep2` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  
+  `contractorId` INT(11) NOT NULL,
+  `companyTypeId` INT(11) NOT NULL,
+  `otherCompanyType` VARCHAR(45) NULL,
+  `directorDetails` VARCHAR(250) NULL,
+  
+  `allDirectorsOfCompany` VARCHAR(999) NULL,
+  `bankruptcyProceedings` VARCHAR(255) NULL,
+  `bankruptcyProceedingsComments` VARCHAR(255) NULL,
+  `convictedToCriminalOffence` VARCHAR(255) NULL,
+  `convictedToCriminalOffenceComments` VARCHAR(255) NULL,
+  `trusteeOfAshantiDutch` VARCHAR(255) NULL,
+   `trusteeOfAshantiDutchComments` VARCHAR(255) NULL,
+  
+  `parentCompanyAddress` VARCHAR(999) NULL,
+  `companyRegisterationNumber` VARCHAR(999) NULL,
+  `registeredWithTradeBodies` VARCHAR(45) NULL,
+  `registerationNumber` VARCHAR(999) NULL,
+  `qualityMarks` VARCHAR(45) NULL,
+  `qualityMarksDetails`  VARCHAR(999) NULL,
+  `registeredWithConstructionLine`  VARCHAR(45) NULL,
+  `constructionLineRegisterationNumber` VARCHAR(999) NULL,
+  `employeesCount` VARCHAR(999) NULL,
+  `employeesTrade` VARCHAR(999) NULL,
+  `employSubcontractors` VARCHAR(45) NULL,
+  `employSubContractorRegisterationNumber` VARCHAR(255) NULL,
+  `taxOfficeAddress` VARCHAR(999) NULL,
+  `taxReferenceNumber` VARCHAR(999) NULL,
+  `insurerNameandAddress` VARCHAR(999) NULL,
+  `policyNumber` VARCHAR(999) NULL,
+  `employersLiability`  VARCHAR(999) NULL,
+  `publicLiability`  VARCHAR(999) NULL,
+  `proffessionalIndemnity` VARCHAR(999) NULL,
+  `insauranceCoverExpiryDate` VARCHAR(999) NULL,
+  `officeAddressId` INT(11) NOT NULL,
+  `correspondenceAddressId` INT(11) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  
+  CREATE TABLE `perpetual`.`tbl_perpetualrents_contractorregisterationstep3` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `writtenHealthPolicy` VARCHAR(45) NULL,
+  `writtenHealthPolicyComments` VARCHAR(255) NULL,
+  `writtenHealthPolicyFileId` INT(11) NULL,
+  `competentHealthAndSafetyAdvice` VARCHAR(45) NULL,
+  `competentHealthAndSafetyAdviceComments` VARCHAR(255) NULL,
+  `receivedHealthAndSafety`  VARCHAR(45) NULL,
+  `receivedHealthAndSafetyComments`  VARCHAR(255) NULL,
+  `yearEnding1` VARCHAR(45) NULL,
+  `fatalAccidents1` VARCHAR(45) NULL,
+  `reportableInjuries1` VARCHAR(45) NULL,
+  `accidentRate1` VARCHAR(45) NULL,
+  `nonReportableInjuries1` VARCHAR(45) NULL,
+  `yearEnding2` VARCHAR(45) NULL,
+  `fatalAccidents2` VARCHAR(45) NULL,
+  `reportableInjuries2` VARCHAR(45) NULL,
+  `accidentRate2` VARCHAR(45) NULL,
+  `nonReportableInjuries2` VARCHAR(45) NULL,
+  `enforcementNoticeforHealthSafety` VARCHAR(45) NULL,
+  `enforcementNoticeforHealthSafetyComments` VARCHAR(45) NULL,
+  `safetyAccreditation` VARCHAR(45) NULL,
+  `safetyAccreditationComments` VARCHAR(45) NULL,
+  `equalityPolicy` VARCHAR(45) NULL,
+  `equalityPolicyComments` VARCHAR(45) NULL,
+  `equalityPolicyFileId` INT(11) NULL,
+  `anyunlawfulDiscrimination` VARCHAR(45) NULL,
+  `anyunlawfulDiscriminationComments` VARCHAR(45) NULL,
+  `subjectOfFormalInvestigation` VARCHAR(45) NULL,
+  `subjectOfFormalInvestigationComments` VARCHAR(45) NULL,
+  `willingToAbideByCharities`VARCHAR(45) NULL,
+  `additionalInformationOfCost`VARCHAR(255) NULL,
+  `contractorId`INT(11) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+ 
+  
+  CREATE TABLE `perpetual`.`tbl_perpetualrents_contractorregisterationstep4` ( 
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  
+  `contractorId` INT(11) NULL,
+  `referenceAddress1` VARCHAR(255) NULL,
+  `referenceContact1` VARCHAR(255) NULL,
+  `description1` VARCHAR(255) NULL,
+  `referenceAddress2` VARCHAR(255) NULL,
+  `referenceContact2` VARCHAR(255) NULL,
+  `description2` VARCHAR(255) NULL,
+  `referenceAddress3`  VARCHAR(255) NULL,
+  `referenceContact3`  VARCHAR(255) NULL,
+  `description3` VARCHAR(255) NULL,
+  `externalHealthAndSafetyAccrediation` VARCHAR(45) NULL,
+  `externalHealthAndSafetyAccrediationComments` VARCHAR(255) NULL,
+  `additionalInformation` VARCHAR(255) NULL,
+  `signedBy` VARCHAR(45) NULL,
+  `signedDate` VARCHAR(45) NULL,
+  `signeeName` VARCHAR(45) NULL,
+  `signeePosition` VARCHAR(45) NULL,
+  `signeePhoneNumber` VARCHAR(15) NULL, 
+  `signeeAlternatePhoneNumber` VARCHAR(15) NULL,                                                       // Change in table 
+  `signeeEmailAddress` VARCHAR(45) NULL,
+  `contactPersonName` VARCHAR(45) NULL,
+  `contactPersonPosition` VARCHAR(45) NULL,
+  `contactPersonTelephoneNumber`VARCHAR(11) NULL,
+  `contactPersonEmailAddress` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetual`.`tbl_perpetualrents_lead` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  `address` VARCHAR(225) NOT NULL,
+  `message` VARCHAR(225) NOT NULL,
+  `contactNumber` VARCHAR(15) NULL,
+  `email` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`));
+
+  
+  CREATE TABLE `tbl_perpetualrents_conversation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `createdOn` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `createdUserId` int(11) DEFAULT NULL,
+  `conversationIdentity` varchar(255) NOT NULL,
+  `actorOneObjectTypeId` int(5) NOT NULL,
+  `actorOneId` int(45) NOT NULL,
+  `actorTwoObjectTypeId` int(5) NOT NULL,
+  `actorTwoId` int(11) NOT NULL,
+  `propertyId` int(11) DEFAULT NULL,
+  `propertyTypeId` int(5) DEFAULT NULL,
+  `mailId1` varchar(50) DEFAULT NULL,
+  `mailId2` varchar(50) DEFAULT NULL,
+  `functionalityId` int(11) DEFAULT NULL,
+  `jobsDescription` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`));
+  
+
+CREATE TABLE `perpetualrents`.`tbl_perpetualrents_city` (
+   `id` INT NOT NULL AUTO_INCREMENT, 
+  `city` VARCHAR(11) NOT NULL,
+  `cityId` INT(11) NOT NULL,                                                            // Change in table 
+  `objectType` VARCHAR(45) NOT NULL,
+  `objectId` VARCHAR(45) NOT NULL,
+   PRIMARY KEY (`id`),
+  UNIQUE KEY (`city`, `objectType`, `objectId`));
+  
+CREATE TABLE `perpetualrents`.`tbl_perpetualrents_perpetualcity` (
+   `id` INT NOT NULL AUTO_INCREMENT, 
+  `city` VARCHAR(11) NOT NULL,
+   PRIMARY KEY (`id`, `city`),
+   UNIQUE KEY (`city`));
+   
+     
+CREATE TABLE `perpetualrents`.`tbl_perpetualrents_perpetualcounty` (
+   `id` INT NOT NULL AUTO_INCREMENT, 
+  `county` VARCHAR(11) NOT NULL,
+   PRIMARY KEY (`id`, `county`),
+   UNIQUE KEY (`county`));
+  
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_landlord` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `uniqueReference` VARCHAR(45) NOT NULL,
+  `firstName` VARCHAR(45) NOT NULL,
+  `lastName` VARCHAR(45) NOT NULL,
+  `primaryEmailId` VARCHAR(45) NOT NULL,
+  `secondaryEmailId` VARCHAR(45) NULL,
+  `primaryPhoneNumber` VARCHAR(45) NOT NULL,
+  `secondaryPhoneNumber` VARCHAR(45) NULL,
+  `enabled` BIT(1) NULL DEFAULT true,
+  `userLoginId` INT(11) NOT NULL,
+  PRIMARY KEY (`id`), 
+  UNIQUE KEY (`uniqueReference`));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_address` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `addressLine1` VARCHAR(45) NOT NULL,
+  `addressLine2` VARCHAR(45) NULL,
+  `city` INT(11) NOT NULL,
+  `county` VARCHAR(45) NULL,
+  `landmark` VARCHAR(45) NULL,
+  `latitude` VARCHAR(45) NULL,
+  `longitude` VARCHAR(45) NULL,
+  `objectType` INT(11) NOT NULL,
+  `objectId` INT(11) NOT NULL,
+  `postCode` VARCHAR(45) NOT NULL,
+  `countryId` INT(11) NOT NULL ,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_country` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `countryName` VARCHAR(45) NOT NULL,
+  `countryAlias` VARCHAR(45) NOT NULL,
+  `countryCode` VARCHAR(45) NOT NULL,
+  `currency` VARCHAR(45) NULL,
+  `timezone` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_charity` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `companyName` VARCHAR(45) NOT NULL,
+  `authorisedPerson` VARCHAR(45) NOT NULL,
+  `uniqueReference` VARCHAR(45) NOT NULL,
+  `weburl` VARCHAR(45) NULL,
+  `enabled` BIT(1) DEFAULT true,
+  `userLoginId` INT(11) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetualrents-dev`.`tbl_perpetualrents_assignmodel` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11)  NULL,
+  `assignById` INT(11)  NOT NULL,
+  `assignByTypeId` INT(11)  NOT NULL,
+  `assignToId` INT(11)  NOT NULL,
+  `assignToTypeId` INT(11)  NOT NULL,
+  `cityId` INT(11)  NOT NULL,
+  `propertyId` INT(11)  NOT NULL,
+  `enable` BIT(1) DEFAULT true,
+  `statusId` INT(5) NULL,
+  `remarks` VARCHAR(255) NULL,
+  `estimatedCompletionDate` VARCHAR(45) NULL,
+  `estimatedCost` VARCHAR(45) NULL,
+  `functionalityId` INT(5) NULL,
+  `jobDescription` VARCHAR(300) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`assignById`, `assignByTypeId`, `assignToId`, `assignToTypeId`, `propertyId`, `functionalityId`));
+  
+CREATE TABLE `perpetualrents`.`tbl_perpetualrents_identitygenerator` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `start` INT(11) NOT NULL,
+  `end` INT(11) NOT NULL,
+  `objective` VARCHAR(45) NOT NULL,
+  `prefix` VARCHAR(45) NOT NULL,
+  `identityNumber` VARCHAR(45) NOT NULL,
+  `length` INT(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (objective));
+  
+ CREATE TABLE `perpetualrents`.`tbl_perpetualrents_questiongroup` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `groupName` VARCHAR(45) NOT NULL,
+  `failThreshold` INT(5) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (groupName));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_propertyquestions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `groupId` INT(11) NOT NULL,
+  `fieldName` VARCHAR(45) NOT NULL,
+  `description` VARCHAR(255) NOT NULL,
+  `question` VARCHAR(255) NULL,
+  `documentSupported` BIT(1) NULL DEFAULT false,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (fieldName));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_propertyresponse` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `propertyId` INT(11) NOT NULL,
+  `questionId` INT(11) NULL,
+  `groupId` INT(11) NULL,
+  `fieldName` VARCHAR(45) NOT NULL,
+  `response` VARCHAR(11) NULL DEFAULT NULL,
+  `comments` VARCHAR(45) NULL,
+  `remarks` VARCHAR(45) NULL,
+  `documentId` INT(11) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (groupId, questionId, fieldName, propertyId));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_property` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `contactPerson` VARCHAR(255) NOT NULL,
+  `agentName` VARCHAR(255) NOT NULL,
+  `agentContactNumber` VARCHAR(255) NOT NULL,
+  `agentAddressLine` VARCHAR(255) NOT NULL,
+  `uniqueReference` VARCHAR(255) NOT NULL,
+  `statusPercentage` INT(5) NOT NULL DEFAULT 0,
+  `landlordID` INT(11) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_propertymarketinginformation` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `availability` VARCHAR(45) NOT NULL,
+  `rentAmount` VARCHAR(45) NOT NULL,
+  `propertyType` VARCHAR(45) NOT NULL,
+  `propertyOtherType` VARCHAR(45) NULL,
+  `rentPeriod` VARCHAR(45) NOT NULL,
+  `bedroomCount` INT(5) NOT NULL,
+  `bathroomCount` INT(5) NOT NULL,
+  `seprateWC` INT(5) NOT NULL,
+  `furnished` BIT(1) NULL DEFAULT NULL,
+  `flooring` BIT(1) NULL DEFAULT NULL,
+  `flooringComments` VARCHAR(999) NULL DEFAULT NULL,                                              //change in table
+  `curtains` BIT(1) NULL DEFAULT NULL,
+  `curtainsComments` VARCHAR(999) NULL DEFAULT NULL,                                             //change in table
+  `frontGarden` BIT(1) NULL DEFAULT NULL,
+  `frontGardenComments` VARCHAR(999) NULL DEFAULT NULL,                                           //change in table
+  `rearGarden` BIT(1) NULL DEFAULT NULL,
+  `rearGardenComments` VARCHAR(999) NULL DEFAULT NULL,                                           //change in table
+  `wheelChairAccess` BIT(1) NULL DEFAULT NULL,
+  `wheelChairAccessComments` VARCHAR(999) NULL DEFAULT NULL,                                       //change in table
+  `extraStairs` BIT(1) NULL DEFAULT NULL,
+  `extraStairsComments` VARCHAR(255) NULL,
+  `otherPropertyInformation` VARCHAR(255) NULL,
+  `propertyId` INT(11) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_file` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `filePath` VARCHAR(255) NOT NULL,
+  `fileName` VARCHAR(255) NOT NULL,
+  `contentType` VARCHAR(255) NOT NULL,
+  `documentType` INT(5) NOT NULL,
+  `objectType` INT(5) NULL,
+  `objectId` INT(11) NOT NULL,
+  `size` INT(11) NOT NULL ,
+  PRIMARY KEY (`id`));
+  
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_documents` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedOn` TIMESTAMP NULL,
+  `modifiedUserId` INT(11) NULL,
+  `fileName` VARCHAR(45) NOT NULL,
+  `contractorId` INT(11) NOT NULL,
+  `propertyId` INT(11) NOT NULL,
+  `fileId` INT(11) NOT NULL,
+  `documentTypeId` INT(5) NOT NULL,
+  `functionalityId` INT(11) NULL,
+  `statusId` INT(5) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_applicationsession` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `destroyedOn` TIMESTAMP NULL,
+  `IPAddress` VARCHAR(45) NOT NULL,
+  `sessionIdentity` VARCHAR(45) NOT NULL,
+  `sessionStatus` VARCHAR(45) NOT NULL,
+  `username` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_expertise` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `functionalityId` VARCHAR(45) NOT NULL,
+  `qualification` VARCHAR(45) NULL,
+  `enabled` BIT(1) NULL DEFAULT TRUE,
+  `contractorId` INT(11) NOT NULL,
+  	PRIMARY KEY (`id`));
+  	
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_admin` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `uniqueReference` VARCHAR(45) NOT NULL,
+  `firstName` VARCHAR(45) NULL,
+  `lastName` VARCHAR(45) NULL,
+  `enabled` BIT(1) NOT NULL DEFAULT TRUE,
+  `userLoginId` INT(11) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `perpetualrents`.`tbl_perpetualrents_maileventconfiguration` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `createdOn` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modifiedOn` TIMESTAMP NULL,
+  `createdUserId` INT(11) NULL DEFAULT NULL,
+  `modifiedUserId` INT(11) NULL,
+  `mailEventTypeId` INT(11) NOT NULL,
+  `mailEventTypeName` VARCHAR(45) NOT NULL,
+  `mailEventActorId` INT(11) NOT NULL,
+  `mailEventActorName` VARCHAR(45) NOT NULL,
+  `documentId` INT(11) NULL,
+  `actorTypeId` INT(11) NOT NULL,
+  `actorTypeName` VARCHAR(45) NOT NULL,
+  `enable` BIT(1) NULL DEFAULT FALSE,
+  PRIMARY KEY (`id`));
+
+  CREATE TABLE `tbl_perpetualrents_mailevent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mailEventType` int(11) NOT NULL,
+  `mailEvent` int(11) NOT NULL,
+  `documentId` int(11) NOT NULL,
+  `actorId` int(11) NOT NULL,
+  `block` bit(1) DEFAULT b'0',
+  PRIMARY KEY (`id`));
+
+CREATE TABLE `tbl_perpetualrents_mail` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `subject` VARCHAR(255) NOT NULL,
+  `mailBody` VARCHAR(99999) NOT NULL,
+  `mailFrom` VARCHAR(100) NOT NULL,
+  `mailTo` VARCHAR(100) NOT NULL,
+  `attachmentCount` INT(11) DEFAULT '0',
+  `mailFlowType` TINYINT(4) DEFAULT NULL,
+  `mailEventType` TINYINT(4) DEFAULT NULL,
+  `mailEventActor` TINYINT(4) DEFAULT NULL,
+  `createdOn` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `mailMessageId` VARCHAR(50) DEFAULT NULL,
+  `mailMessageReference` VARCHAR(255) DEFAULT NULL,,
+  `mailOrigin` VARCHAR(100) NOT NULL,
+  `receivedOn` VARCHAR(255) DEFAULT NULL,
+  `conversationId` INT(11) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `tbl_perpetualrents_conversation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `createdOn` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `createdUserId` int(11) DEFAULT NULL,
+  `conversationIdentity` varchar(255) NOT NULL,
+  `actorOneObjectTypeId` int(5) NOT NULL,
+  `actorOneId` int(45) NOT NULL,
+  `actorTwoObjectTypeId` int(5) NOT NULL,
+  `actorTwoId` int(11) NOT NULL,
+  `propertyId` varchar(50) DEFAULT NULL,
+  `mailId1` varchar(50) DEFAULT NULL,
+  `mailId2` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `tbl_perpetualrents_mailattachementfile` (
+  `id` int(11) NOT NULL,
+  `fileName` varchar(255) NOT NULL,
+  `size` int(11) NOT NULL,
+  `fileData` longblob NOT NULL,
+  `contentType` varchar(5) DEFAULT NULL,
+  `referenceId` int(11) NOT NULL,
+  `createdOn` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);

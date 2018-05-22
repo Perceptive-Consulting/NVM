@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+            
+                
+        <p>Dear Admin <span th:text="${receiverName}"></span>,</p>
+
+		<p>A new Landlord <span th:text="${landlordName}"></span> has just registered on the site,</p>
+		
+		<p>Please ensure that their identification is checked and that any registered properties are owned by the landlord</p>
+			
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

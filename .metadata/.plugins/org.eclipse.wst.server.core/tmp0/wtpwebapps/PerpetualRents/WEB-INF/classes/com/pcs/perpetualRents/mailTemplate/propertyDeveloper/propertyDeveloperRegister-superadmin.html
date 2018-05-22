@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+            
+                
+        <p>Dear SuperAdmin <span th:text="${receiverName}"></span>,</p>
+
+		<p>A new Property Developer <span th:text="${propertyDeveloperName}"></span> has just registered a development project at the following address <span th:text="${Address}"></span> and at this point an email has been issued to the developer on your behalf. </p>
+					
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     		     
+    </body>
+    
+</html>

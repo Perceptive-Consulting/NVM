@@ -1,0 +1,33 @@
+package com.pcs.perpetualRents.test;
+
+import com.pcs.perpetualRents.business.bean.Contractor;
+
+public class Test {
+	public static void main(String[] args) {
+		
+		new Test().update(Contractor.TABLE_NAME, new String[]{Contractor.BUSINESS_NATURE, Contractor.COMPANY_NAME}, new String[]{Contractor.ID}, new String[]{"1"});
+	}
+	
+	public void update(String tableName, String[] fields, String[] whereCondition, String[] whereValues){
+		String sql = " SELECT ";
+		
+		String delim = "";
+		for (String tField : fields) {
+			sql += delim + tField;
+			delim = ", ";
+		}
+		sql += " FROM " + tableName;
+		
+		if(whereCondition != null){
+			   int wCounter = 0;
+			   String wDelim = "";
+			   for (String value : whereValues) {
+				   sql += wDelim + " WHERE " + whereCondition[wCounter] + " = '" + value + "'";
+				   wDelim = " AND ";
+			   	}
+		   }
+		
+		System.out.println(sql);
+	}
+}
+

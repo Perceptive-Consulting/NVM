@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:remove="all"></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+     
+        <p>Dear <span th:text="${receiverName}">Admin</span>, A new contractor
+         <span th:text="${companyName}"></span> has just registered on the site,</p>
+
+		<p>Please ensure that their identification and disclosure profile is checked as they will need to upload a scanned copy of the basic
+		 certificate within 20 days of the application(this is applicable for every person that will be entering a home).</p>
+			
+		<p>Thanks</p>
+		
+		<p><span th:text="${senderName}">Admin</span></p>
+		
+		<p>&nbsp;</p>
+			     
+			     
+    </body>
+    
+
+</html>

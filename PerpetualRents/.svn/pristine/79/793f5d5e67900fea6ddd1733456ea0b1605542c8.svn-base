@@ -1,0 +1,117 @@
+package com.pcs.perpetualRents.test;
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Scanner;
+
+import org.apache.commons.lang.StringUtils;
+public class Alphabet_Freq{
+	
+	private int counter = 0;
+    public static void main(String args[])throws IOException, ParseException, InterruptedException{
+    	/*String str = "uploadFiles\\2014\\November\\CommonFolder\\10-18-16-3-225-1.JPG";
+    	str = str.replaceAll("\\\\", "/");
+    	System.out.println(str);*/
+    	int a[] = {1,1};
+    	int b=1;
+    	a[b] = b= 0;
+    	System.out.println(a[0]);
+    	System.out.println(a[1]);
+    	
+    	boolean b2= true;
+    	Boolean b1 = new Boolean("true");
+    	Boolean b3 = new Boolean("true");
+    	System.out.println(b1==b3);
+    	int a1 = 2;
+    	
+    	switch (a1) {
+    	
+    	case 2:
+			System.out.println((10/2*5)+",");
+			
+    	case 3:
+			System.out.println((10/2*10)+",");
+
+		default:
+			break;
+		}
+    	
+    }
+    public int calculateAgentDaysInTransit(final Date collectionDate, final int deliveryDays, final Long countryId, final Long agentId) throws InterruptedException {
+
+        int extraDays = 0;
+
+        boolean shouldStop = false;
+
+        Calendar curDateCalendar = Calendar.getInstance();
+
+              curDateCalendar.setTime(collectionDate);
+              int revisedeliveryDays = deliveryDays;
+              do {
+                    boolean isHoliday = isHoliday();
+                    System.out.println("is holiday : " + isHoliday);
+                    curDateCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                    if(isHoliday){
+                    	revisedeliveryDays--;
+                          extraDays++;
+                    } else {
+                    	if(revisedeliveryDays > 0){
+                    		revisedeliveryDays--;
+                    		continue;
+                    	}else{
+                    		shouldStop = true;	
+                    	}
+                   	}
+                    
+              }while(!shouldStop);
+
+        return extraDays + deliveryDays;
+
+  }
+    
+    public boolean isHoliday(){
+    	System.out.println("Counter : " + counter);
+    	counter++;
+    	if(counter/2 == 0){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    	
+    }
+    
+    public void abc(){
+    	int x = 0;
+    	int y = 0;
+    	for (int i = 0; i < 5; i++) {
+    		if((++x > 2) && (++y > 2)){
+    			x++;
+    		}
+			
+		}
+    	System.out.println(x);
+    	System.out.println(y);
+    }
+    
+    public void abc1(){
+    	int x = 20;
+    	String str = (x < 15) ? "small" : (x < 22)? "tiny": "big"; 
+    	System.out.println(str);
+    }
+    
+    void start(){
+    	long [] a1 = {3,4,5};
+    	long [] a2 = fix(a1);
+    	System.out.println(a1[0] + a1[1] + a1[2] + " ");
+    	System.out.println(a2[0] + a2[1] + a2[2]);
+    }
+    
+     long[] fix(long a3[]){
+    	 a3[1] = 7;
+    	 return a3;
+     }
+    
+}
